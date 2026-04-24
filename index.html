@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maxime Réthoré — IA concrète</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--cream:#F5F3EE;--rust:#B85C4A;--sage:#6B7A6B;--charcoal:#1A1A1A;--light:#FAFAF8;--border:#E2DED6}
+  html{cursor:none;scroll-behavior:smooth}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--charcoal);font-size:16px;line-height:1.6;overflow-x:hidden}
+  #cursor{width:10px;height:10px;background:var(--rust);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s,background .2s,width .2s,height .2s}
+  #cursor-ring{width:36px;height:36px;border:1.5px solid var(--rust);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .12s ease-out,top .12s ease-out,width .2s,height .2s,opacity .2s;opacity:.5}
+  body.hovering #cursor{width:20px;height:20px;background:var(--sage)}
+  body.hovering #cursor-ring{width:48px;height:48px;opacity:.2}
+  nav{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 4rem;background:rgba(245,243,238,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:100}
+  .logo{font-family:'DM Serif Display',serif;font-size:1.1rem;letter-spacing:.02em;color:var(--charcoal);text-decoration:none}
+  .logo span{color:var(--rust)}
+  nav ul{list-style:none;display:flex;gap:2rem}
+  nav ul a{text-decoration:none;font-size:.82rem;font-weight:400;color:var(--charcoal);letter-spacing:.08em;text-transform:uppercase;opacity:.7;transition:opacity .2s}
+  nav ul a:hover{opacity:1}
+  section{padding:7rem 4rem}
+  .container{max-width:960px;margin:0 auto}
+  #hero{min-height:100vh;display:flex;align-items:center;padding-top:8rem;background:var(--cream)}
+  .hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;max-width:960px;margin:0 auto}
+  .hero-tag{display:inline-block;font-size:.75rem;letter-spacing:.15em;text-transform:uppercase;color:var(--rust);border:1px solid var(--rust);padding:.3rem .8rem;margin-bottom:1.5rem;border-radius:2px}
+  h1{font-family:'DM Serif Display',serif;font-size:3.2rem;line-height:1.1;font-weight:400;margin-bottom:1.5rem;color:var(--charcoal)}
+  h1 em{font-style:italic;color:var(--rust)}
+  .hero-sub{font-size:1.05rem;color:#555;max-width:380px;line-height:1.8;margin-bottom:2.5rem}
+  .cta-group{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+  .btn-primary{background:var(--charcoal);color:#fff;padding:.85rem 2rem;border:none;font-family:'DM Sans',sans-serif;font-size:.9rem;letter-spacing:.05em;cursor:none;transition:background .2s,transform .15s;text-decoration:none;display:inline-block}
+  .btn-primary:hover{background:var(--rust);transform:translateY(-1px)}
+  .btn-ghost{color:var(--charcoal);font-size:.9rem;text-decoration:none;letter-spacing:.05em;border-bottom:1px solid var(--charcoal);padding-bottom:2px;transition:color .2s,border-color .2s}
+  .btn-ghost:hover{color:var(--rust);border-color:var(--rust)}
+  .hero-visual{display:flex;flex-direction:column;gap:1rem}
+  .stat-card{background:var(--light);border:1px solid var(--border);padding:1.25rem 1.5rem;position:relative;overflow:hidden}
+  .stat-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rust)}
+  .stat-card.sage::before{background:var(--sage)}
+  .stat-num{font-family:'DM Serif Display',serif;font-size:2.2rem;color:var(--charcoal)}
+  .stat-label{font-size:.8rem;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem}
+  /* ABOUT */
+  #about{background:var(--charcoal);color:#fff}
+  #about h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:2rem;color:#fff}
+  #about h2 em{color:var(--rust);font-style:italic}
+  .about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:5rem;align-items:start}
+  .about-left{display:flex;flex-direction:column;gap:2rem}
+  .about-photo{width:100%;max-width:260px;aspect-ratio:3/4;object-fit:cover;object-position:top;filter:grayscale(20%);border:2px solid rgba(255,255,255,.08)}
+  .about-photo-placeholder{width:100%;max-width:260px;aspect-ratio:3/4;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:rgba(255,255,255,.3);font-size:.82rem;text-align:center;padding:1rem}
+  .about-text p{color:rgba(255,255,255,.75);line-height:1.9;margin-bottom:1.2rem;font-size:.97rem}
+  .about-text p strong{color:#fff;font-weight:500}
+  .values-list{display:flex;flex-direction:column;gap:1rem}
+  .value-item{border-left:2px solid var(--rust);padding:.8rem 1.2rem;background:rgba(255,255,255,.04)}
+  .value-item.sage{border-color:var(--sage)}
+  .value-title{font-weight:500;font-size:.9rem;color:#fff;margin-bottom:.2rem}
+  .value-desc{font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.5}
+  /* FORMATS */
+  #formats{background:var(--light)}
+  #formats h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:.5rem}
+  #formats h2 em{color:var(--rust);font-style:italic}
+  .section-intro{color:#666;margin-bottom:3rem;font-size:.97rem;max-width:520px}
+  .formats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .format-card{border:1px solid var(--border);background:#fff;padding:2rem 1.5rem;position:relative;transition:border-color .25s,transform .25s}
+  .format-card:hover{border-color:var(--rust);transform:translateY(-3px)}
+  .format-icon{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--cream);margin-bottom:1.2rem;font-size:1.2rem}
+  .format-name{font-weight:500;font-size:1rem;margin-bottom:.5rem;color:var(--charcoal)}
+  .format-desc{font-size:.83rem;color:#777;line-height:1.7}
+  .format-price{margin-top:1.2rem;font-size:.78rem;color:var(--rust);font-weight:500;letter-spacing:.05em}
+  /* REFERENCES */
+  #references{background:var(--cream)}
+  #references h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:.5rem}
+  #references h2 em{color:var(--rust);font-style:italic}
+  .refs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+  .ref-card{background:#fff;border:1px solid var(--border);padding:1.5rem;transition:border-color .2s}
+  .ref-card:hover{border-color:var(--sage)}
+  .ref-org{font-weight:500;font-size:.95rem;color:var(--charcoal);margin-bottom:.3rem}
+  .ref-type{display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--sage);border:1px solid var(--sage);padding:.15rem .5rem;margin-bottom:.8rem}
+  .ref-desc{font-size:.82rem;color:#777;line-height:1.6}
+  /* TESTIMONIALS */
+  #testimonials{background:var(--light)}
+  #testimonials h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:3rem}
+  #testimonials h2 em{color:var(--rust);font-style:italic}
+  .testi-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+  .testi-card{border:1px solid var(--border);padding:2rem;background:#fff;position:relative}
+  .testi-card::before{content:'\201C';font-family:'DM Serif Display',serif;font-size:5rem;color:var(--rust);opacity:.15;position:absolute;top:-.5rem;left:1.2rem;line-height:1}
+  .testi-quote{font-size:.88rem;line-height:1.8;color:#555;margin-bottom:1.2rem;font-style:italic}
+  .testi-author{font-weight:500;font-size:.85rem;color:var(--charcoal)}
+  .testi-role{font-size:.78rem;color:#999}
+  /* RESSOURCES */
+  #ressources{background:var(--charcoal);color:#fff}
+  #ressources h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:.5rem;color:#fff}
+  #ressources h2 em{color:var(--rust);font-style:italic}
+  .ressources-sub{color:rgba(255,255,255,.5);font-size:.95rem;margin-bottom:3rem;max-width:500px}
+  .ressources-cta{
+    display:inline-flex;align-items:center;gap:.8rem;
+    border:1px solid rgba(255,255,255,.2);
+    padding:1.5rem 2rem;
+    color:#fff;text-decoration:none;
+    font-size:.95rem;
+    transition:border-color .2s,background .2s;
+    background:rgba(255,255,255,.04);
+  }
+  .ressources-cta:hover{border-color:var(--rust);background:rgba(184,92,74,.08)}
+  .ressources-cta .arrow{font-size:1.2rem;transition:transform .2s}
+  .ressources-cta:hover .arrow{transform:translateX(4px)}
+  .ressources-categories{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2.5rem}
+  .res-cat{border:1px solid rgba(255,255,255,.08);padding:1.2rem;background:rgba(255,255,255,.03)}
+  .res-cat-icon{font-size:1.2rem;margin-bottom:.5rem}
+  .res-cat-name{font-size:.82rem;color:rgba(255,255,255,.7);font-weight:500}
+  /* TARIFS */
+  #tarifs{background:var(--light)}
+  #tarifs h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:.5rem}
+  #tarifs h2 em{color:var(--rust);font-style:italic}
+  .tarifs-note{color:#888;font-size:.9rem;margin-bottom:3rem;max-width:500px}
+  .tarifs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .tarif-card{border:1px solid var(--border);padding:2rem 1.5rem;background:#fff}
+  .tarif-name{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:#999;margin-bottom:.8rem}
+  .tarif-price{font-family:'DM Serif Display',serif;font-size:2.4rem;color:var(--charcoal);margin-bottom:.3rem}
+  .tarif-price span{font-size:1rem;font-family:'DM Sans',sans-serif;color:#aaa;margin-left:.3rem}
+  .tarif-desc{font-size:.82rem;color:#777;line-height:1.7;margin-top:.8rem}
+  /* CONTACT */
+  #contact{background:var(--cream)}
+  #contact h2{font-family:'DM Serif Display',serif;font-size:2.8rem;font-weight:400;margin-bottom:1rem}
+  #contact h2 em{color:var(--rust);font-style:italic}
+  .contact-sub{font-size:1rem;color:#666;margin-bottom:3rem;max-width:450px;line-height:1.8}
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+  .contact-infos{display:flex;flex-direction:column;gap:1.2rem}
+  .contact-item{display:flex;gap:1rem;align-items:flex-start}
+  .contact-icon{width:36px;height:36px;min-width:36px;background:var(--charcoal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+  .contact-detail .label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:#999;margin-bottom:.2rem}
+  .contact-detail .value{font-size:.95rem;color:var(--charcoal)}
+  .contact-detail a{color:var(--charcoal);text-decoration:none;border-bottom:1px solid var(--charcoal);padding-bottom:1px;transition:color .2s,border-color .2s}
+  .contact-detail a:hover{color:var(--rust);border-color:var(--rust)}
+  .cal-btn{
+    display:inline-flex;align-items:center;gap:.7rem;
+    background:var(--rust);color:#fff;
+    padding:.9rem 1.8rem;
+    text-decoration:none;
+    font-size:.9rem;
+    letter-spacing:.04em;
+    transition:background .2s,transform .15s;
+    margin-top:.5rem;
+  }
+  .cal-btn:hover{background:var(--charcoal);transform:translateY(-1px)}
+  form input,form textarea,form select{width:100%;font-family:'DM Sans',sans-serif;font-size:.9rem;padding:.9rem 1rem;border:1px solid var(--border);background:#fff;color:var(--charcoal);outline:none;transition:border-color .2s;resize:none;margin-bottom:1rem;cursor:none;appearance:none;-webkit-appearance:none}
+  form select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23aaa' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+  form input::placeholder,form textarea::placeholder{color:#bbb}
+  form input:focus,form textarea:focus,form select:focus{border-color:var(--charcoal)}
+  form button{background:var(--rust);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:.9rem;padding:.9rem 2.5rem;letter-spacing:.05em;cursor:none;transition:background .2s,transform .15s}
+  form button:hover{background:var(--charcoal);transform:translateY(-1px)}
+  footer{text-align:center;padding:2.5rem 4rem;background:var(--charcoal);color:rgba(255,255,255,.3);font-size:.78rem;letter-spacing:.08em}
+  footer span{color:var(--rust)}
+  @media(max-width:768px){nav{padding:1rem 1.5rem}nav ul{gap:1rem}nav ul a{font-size:.72rem}section{padding:5rem 1.5rem}.hero-inner,.about-grid,.contact-grid{grid-template-columns:1fr;gap:2rem}.formats-grid,.refs-grid,.tarifs-grid,.ressources-categories{grid-template-columns:1fr}.testi-grid{grid-template-columns:1fr}h1{font-size:2.4rem}}
+</style>
+</head>
+<body>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav>
+  <a href="#" class="logo">MxR <span>Consulting</span></a>
+  <ul>
+    <li><a href="#about">Approche</a></li>
+    <li><a href="#formats">Formats</a></li>
+    <li><a href="#references">Références</a></li>
+    <li><a href="#ressources">Ressources</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div>
+      <span class="hero-tag">IA générative · Conférences · Conseil</span>
+      <h1>L'IA <em>concrète.</em><br>Sans vendre<br>du rêve.</h1>
+      <p class="hero-sub">J'aide les organisations à comprendre, adopter et utiliser l'IA de façon simple, responsable et immédiatement actionnable.</p>
+      <div class="cta-group">
+        <a href="https://calendar.app.google/PqFVvCrvMm2rQVxh7" target="_blank" class="btn-primary">Réserver 30 min →</a>
+        <a href="#formats" class="btn-ghost">Voir les formats</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="stat-card">
+        <div class="stat-num">+3 ans</div>
+        <div class="stat-label">d'immersion dans l'IA générative</div>
+      </div>
+      <div class="stat-card sage">
+        <div class="stat-num">TPE · PME · ETI</div>
+        <div class="stat-label">profils dirigeants & équipes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">Région lilloise</div>
+        <div class="stat-label">Paris · Lyon · France entière</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-left">
+        <div class="about-photo-placeholder" id="photoPlaceholder">
+          <span style="font-size:2rem;opacity:.3">◎</span>
+          <span>Votre photo ici</span>
+          <span style="font-size:.72rem;opacity:.5">(à remplacer dans le HTML)</span>
+        </div>
+        <div class="about-text">
+          <p>Ancien dirigeant d'une entreprise spécialisée dans le développement informatique, j'ai passé plus de dix ans au cœur des enjeux techniques et digitaux des TPE/PME.</p>
+          <p>L'arrivée de ChatGPT a été un déclencheur. J'ai tout de suite été captivé par le potentiel de l'IA générative — et surtout par la façon dont elle pouvait concrètement transformer les organisations.</p>
+          <p>En 2024, j'ai rejoint la communauté de <strong>La Fresque de l'IA</strong> pour contribuer à la diffusion de pratiques responsables.</p>
+        </div>
+      </div>
+      <div>
+        <h2>Une IA <em>au service<br>d'une stratégie,</em><br>pas l'inverse.</h2>
+        <div class="values-list" style="margin-top:1.5rem">
+          <div class="value-item">
+            <div class="value-title">Concret avant tout</div>
+            <div class="value-desc">Des exemples réels, des outils testés, des usages immédiatement actionnables.</div>
+          </div>
+          <div class="value-item sage">
+            <div class="value-title">Responsable par nature</div>
+            <div class="value-desc">Usage éthique, dimension humaine et écologique intégrées à chaque intervention.</div>
+          </div>
+          <div class="value-item">
+            <div class="value-title">Adapté à votre public</div>
+            <div class="value-desc">Sondage préalable, contenu ajusté au niveau réel du groupe, ton détendu.</div>
+          </div>
+          <div class="value-item sage">
+            <div class="value-title">Stratégique, pas technologique</div>
+            <div class="value-desc">Une stratégie d'entreprise qui intègre l'IA — pas une stratégie IA déconnectée du réel.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMATS -->
+<section id="formats">
+  <div class="container">
+    <h2>Mes formats <em>d'intervention</em></h2>
+    <p class="section-intro">Chaque intervention est pensée pour votre contexte, votre public, vos enjeux. Voici les trois formats principaux.</p>
+    <div class="formats-grid">
+      <div class="format-card">
+        <div class="format-icon">◎</div>
+        <div class="format-name">Conférence & Plénière</div>
+        <div class="format-desc">Sensibilisation à l'IA générative pour dirigeants de TPE/PME. Prise de hauteur, cas d'usages concrets, envie de passer à l'action.</div>
+        <div class="format-price">1h à demi-journée · Seul ou en co-animation</div>
+      </div>
+      <div class="format-card">
+        <div class="format-icon">◈</div>
+        <div class="format-name">Fresque de l'IA</div>
+        <div class="format-desc">Atelier collaboratif pour comprendre les enjeux de l'IA générative dans un cadre responsable. Animateur certifié.</div>
+        <div class="format-price">Demi-journée · Préparation sur-mesure · Plan d'action</div>
+      </div>
+      <div class="format-card">
+        <div class="format-icon">◇</div>
+        <div class="format-name">Diagnostic IA</div>
+        <div class="format-desc">Accompagnement pour embarquer les équipes, identifier les opportunités IA et définir une feuille de route claire et actionnable.</div>
+        <div class="format-price">Format sur-mesure · Organisations & équipes</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REFERENCES -->
+<section id="references">
+  <div class="container">
+    <h2>Quelques <em>références</em></h2>
+    <p class="section-intro">Des interventions variées, du public de 7 à 77 ans aux dirigeants d'ETI — avec un fil rouge : rendre l'IA utile, maintenant.</p>
+    <div class="refs-grid">
+      <div class="ref-card">
+        <div class="ref-type">Conférence</div>
+        <div class="ref-org">Plénière CJD</div>
+        <div class="ref-desc">Co-animation avec Adrien Fabry (Aiko) — cas d'usages concrets et actionnables pour dirigeants.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-type">Fresque IA</div>
+        <div class="ref-org">UniLaSalle</div>
+        <div class="ref-desc">Semaine entrepreneuriat — "Entreprendre avec l'IA dans le secteur Agro/Alim" — public étudiant.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-type">Fresque IA</div>
+        <div class="ref-org">Le Souffle du Nord</div>
+        <div class="ref-desc">Sensibilisation des équipes à l'IA générative dans le secteur de l'ESS.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-type">Commission</div>
+        <div class="ref-org">Groupe Oxygène</div>
+        <div class="ref-desc">Formation pour dirigeants de PME et ETI — approche pragmatique et orientée usage.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-type">Formation</div>
+        <div class="ref-org">BGE</div>
+        <div class="ref-desc">Intervention pour professionnels en développement d'activité — IA accessible à tous les niveaux.</div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-type">Grand public</div>
+        <div class="ref-org">La Famille — "C'est quoi l'IA ?!"</div>
+        <div class="ref-desc">L'intervention déclencheur. Un public de 7 à 77 ans, en plein air, en famille. Un vrai bon moment.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container">
+    <h2>Ce qu'ils en <em>disent</em></h2>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <p class="testi-quote">Il a ce talent rare de rendre l'IA immédiatement actionnable pour votre activité. Il ne vend pas du rêve technologique — il montre comment chacun peut s'en emparer, simplement, à son échelle.</p>
+        <div class="testi-author">Marie-Ange Dussart</div>
+        <div class="testi-role">Experte en transition pro · Intervention BGE</div>
+      </div>
+      <div class="testi-card">
+        <p class="testi-quote">Un format dynamique, un cadre clair, et surtout une vraie envie de passer à l'action en sortant. Simple, authentique et percutant.</p>
+        <div class="testi-author">Caroline Duquesne</div>
+        <div class="testi-role">Avocate · Commission CJD</div>
+      </div>
+      <div class="testi-card">
+        <p class="testi-quote">Une vision positive du sujet et des outils concrets pour gagner du temps à très court terme. Bref, la boîte à outils que j'attendais depuis longtemps.</p>
+        <div class="testi-author">Augustin Motte</div>
+        <div class="testi-role">Dirigeant TOUS ERGO · Plénière CJD</div>
+      </div>
+      <div class="testi-card">
+        <p class="testi-quote">Son approche est pragmatique, accessible et orientée usage, loin des discours trop théoriques. Une excellente porte d'entrée pour réfléchir à la place de l'IA dans nos organisations.</p>
+        <div class="testi-author">Jean-Eudes Broudehoux</div>
+        <div class="testi-role">Dirigeant Broudehoux-Boisse · Groupe Oxygène</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESSOURCES -->
+<section id="ressources">
+  <div class="container">
+    <h2>Mes <em>ressources IA</em></h2>
+    <p class="ressources-sub">Une sélection de contenus que je lis, écoute et teste — pour rester au plus près de ce qui compte vraiment dans l'IA générative.</p>
+    <div class="ressources-categories">
+      <div class="res-cat">
+        <div class="res-cat-icon">◎</div>
+        <div class="res-cat-name">Podcasts</div>
+      </div>
+      <div class="res-cat">
+        <div class="res-cat-icon">◈</div>
+        <div class="res-cat-name">Newsletters</div>
+      </div>
+      <div class="res-cat">
+        <div class="res-cat-icon">◇</div>
+        <div class="res-cat-name">Outils</div>
+      </div>
+      <div class="res-cat">
+        <div class="res-cat-icon">◻</div>
+        <div class="res-cat-name">Lectures</div>
+      </div>
+    </div>
+    <a href="https://mxr-consulting.notion.site/mes-ressources-ia" target="_blank" class="ressources-cta">
+      Accéder à la page ressources complète <span class="arrow">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- TARIFS -->
+<section id="tarifs">
+  <div class="container">
+    <h2>Approche <em>budgétaire</em></h2>
+    <p class="tarifs-note">Chaque intervention est différente. Les tarifs s'adaptent au format, au public, au niveau de personnalisation. Hors frais de déplacement hors MEL.</p>
+    <div class="tarifs-grid">
+      <div class="tarif-card">
+        <div class="tarif-name">Format court</div>
+        <div class="tarif-price">400€ <span>HT</span></div>
+        <div class="tarif-desc">Commission, atelier découverte, intervention courte. Jusqu'à 1h–2h.</div>
+      </div>
+      <div class="tarif-card">
+        <div class="tarif-name">Demi-journée / Journée</div>
+        <div class="tarif-price">1 200€ <span>HT</span></div>
+        <div class="tarif-desc">Conférence ou formation personnalisée. Préparation incluse.</div>
+      </div>
+      <div class="tarif-card">
+        <div class="tarif-name">Fresque de l'IA</div>
+        <div class="tarif-price">2 900€ <span>HT</span></div>
+        <div class="tarif-desc">Préparation sur-mesure + animation demi-journée + synthèse avec plan d'action.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div>
+        <h2>Échangeons <em>30 minutes.</em></h2>
+        <p class="contact-sub">Mon approche vous intéresse ? Vous avez un projet ? Je vous propose un échange rapide pour voir comment je peux vous accompagner.</p>
+        <div class="contact-infos">
+          <div class="contact-item">
+            <div class="contact-icon">☏</div>
+            <div class="contact-detail">
+              <div class="label">Téléphone</div>
+              <div class="value"><a href="tel:0615830588">06 15 83 05 88</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">✉</div>
+            <div class="contact-detail">
+              <div class="label">Email</div>
+              <div class="value"><a href="mailto:maxime@mxr-consulting.com">maxime@mxr-consulting.com</a></div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon" style="font-size:.7rem;font-weight:500">in</div>
+            <div class="contact-detail">
+              <div class="label">LinkedIn</div>
+              <div class="value"><a href="https://www.linkedin.com/in/maxime-r%C3%A9thor%C3%A9/" target="_blank">Maxime Réthoré</a></div>
+            </div>
+          </div>
+          <div class="contact-item" style="margin-top:.5rem">
+            <a href="https://calendar.app.google/PqFVvCrvMm2rQVxh7" target="_blank" class="cal-btn">
+              Réserver un créneau de 30 min →
+            </a>
+          </div>
+        </div>
+      </div>
+      <form onsubmit="handleForm(event)">
+        <input type="text" placeholder="Votre nom" required>
+        <input type="email" placeholder="Votre email" required>
+        <input type="text" placeholder="Votre organisation (optionnel)">
+        <select>
+          <option value="" disabled selected style="color:#bbb">Votre projet</option>
+          <option>Diagnostic IA</option>
+          <option>Conférence / Plénière</option>
+          <option>Fresque de l'IA</option>
+          <option>Formation équipe</option>
+          <option>Autre</option>
+        </select>
+        <textarea rows="4" placeholder="Dites-m'en plus…"></textarea>
+        <button type="submit">Envoyer →</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  © 2025 MxR Consulting · <span>Maxime Réthoré</span> · Région lilloise · Paris · Lyon
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor');
+const ring=document.getElementById('cursor-ring');
+let ringX=0,ringY=0,mx=0,my=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px'});
+function animRing(){ringX+=(mx-ringX)*.12;ringY+=(my-ringY)*.12;ring.style.left=Math.round(ringX)+'px';ring.style.top=Math.round(ringY)+'px';requestAnimationFrame(animRing)}
+animRing();
+document.querySelectorAll('a,button,input,textarea,select,.format-card,.ref-card,.testi-card,.ressources-cta').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+function handleForm(e){
+  e.preventDefault();
+  const btn=e.target.querySelector('button');
+  btn.textContent='Message envoyé ✓';
+  btn.style.background='#6B7A6B';
+  setTimeout(()=>{btn.textContent='Envoyer →';btn.style.background='';e.target.reset()},3000);
+}
+</script>
+</body>
+</html>
