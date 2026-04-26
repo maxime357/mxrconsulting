@@ -17,6 +17,7 @@ body.hovering #cursor-ring{width:48px;height:48px;opacity:.2}
 nav{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:1.2rem 3rem;background:rgba(245,243,238,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:100}
 .logo{font-family:'DM Serif Display',serif;font-size:1.1rem;letter-spacing:.02em;color:var(--charcoal);text-decoration:none}
 .logo span{color:var(--rust)}
+.hamburger{display:none}
 nav ul{list-style:none;display:flex;gap:1.8rem}
 nav ul a{text-decoration:none;font-size:.78rem;font-weight:400;color:var(--charcoal);letter-spacing:.07em;text-transform:uppercase;opacity:.7;transition:opacity .2s}
 nav ul a:hover{opacity:1}
@@ -44,7 +45,7 @@ h1 em{font-style:italic;color:var(--rust)}
 
 /* ABOUT */
 #about{background:var(--charcoal);color:#fff}
-#about h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:2rem;color:#fff}
+#about h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:.4rem;color:#fff}
 #about h2 em{color:var(--rust);font-style:italic}
 .about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:5rem;align-items:start}
 .about-left{display:flex;flex-direction:column;gap:2rem}
@@ -159,8 +160,15 @@ footer span{color:var(--rust)}
 
 @media(max-width:768px){
   nav{padding:1rem 1.5rem}
-  nav ul{gap:.8rem}
-  nav ul a{font-size:.68rem}
+  nav ul{display:none;flex-direction:column;gap:0;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,26,.97);z-index:99;justify-content:center;align-items:center}
+  nav ul.open{display:flex}
+  nav ul a{font-size:1.2rem;opacity:1;padding:1rem 0;letter-spacing:.1em}
+  .hamburger{display:flex;flex-direction:column;gap:5px;cursor:none;z-index:101;background:none;border:none;padding:4px}
+  .hamburger span{display:block;width:24px;height:2px;background:var(--charcoal);transition:transform .3s,opacity .3s}
+  .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .hamburger.open span:nth-child(2){opacity:0}
+  .hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+  .hamburger.open span{background:#fff}
   section{padding:5rem 1.5rem}
   .hero-inner,.about-grid,.contact-grid{grid-template-columns:1fr;gap:2rem}
   .formats-grid,.refs-grid,.tarifs-grid,.agents-grid{grid-template-columns:1fr}
@@ -175,7 +183,10 @@ footer span{color:var(--rust)}
 
 <nav>
   <a href="#" class="logo">MxR <span>Consulting</span></a>
-  <ul>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul id="nav-menu">
     <li><a href="#about">Approche</a></li>
     <li><a href="#formats">Formats</a></li>
     <li><a href="#references">Références</a></li>
@@ -189,7 +200,7 @@ footer span{color:var(--rust)}
 <section id="hero">
   <div class="hero-inner">
     <div>
-      <span class="hero-tag">IA générative · Conférences · Conseil</span>
+      <span class="hero-tag">Diagnostic IA · Conférences · Conseil</span>
       <h1>L'IA <em>concrète.</em><br>Sans vendre<br>du rêve.</h1>
       <p class="hero-sub">J'aide les organisations à comprendre, adopter et utiliser l'IA de façon simple, responsable et actionnable.</p>
       <div class="cta-group">
@@ -227,7 +238,8 @@ footer span{color:var(--rust)}
         <div class="about-text">
           <p>Ancien dirigeant d'une entreprise spécialisée dans le développement informatique, j'ai passé plus de dix ans au cœur des enjeux techniques et digitaux des TPE/PME.</p>
           <p>L'arrivée de ChatGPT a été un déclencheur. J'ai tout de suite été captivé par le potentiel de l'IA générative — et surtout par la façon dont elle pouvait concrètement transformer les organisations.</p>
-          <p>En 2024, j'ai rejoint la communauté de <strong>La Fresque de l'IA</strong> pour contribuer à la diffusion de pratiques responsables.</p>
+          <p>En 2024, j'ai rejoint la communauté de <a href="https://lafresquedelia.com/" target="_blank" style="color:#fff;border-bottom:1px solid rgba(255,255,255,.4);text-decoration:none;font-weight:500">La Fresque de l'IA</a> pour contribuer à la diffusion de pratiques responsables.</p>
+          <p>En 2025, je rejoins en tant que consultant externe <a href="https://www.aikogroup.ai/" target="_blank" style="color:#fff;border-bottom:1px solid rgba(255,255,255,.4);text-decoration:none">aiko</a> pour réaliser des diagnostics dans le cadre du programme <a href="https://flash.bpifrance.fr/financement/pret-boost-intelligence-artificielle" target="_blank" style="color:#fff;border-bottom:1px solid rgba(255,255,255,.4);text-decoration:none;font-weight:500">BPI Booster IA</a> auprès de PME. Sur le terrain, j'organise des interviews individuels et des ateliers collectifs pour identifier les opportunités IA, puis je formalise une roadmap permettant à chaque organisation d'avancer de façon structurée, consciente et en embarquant pleinement ses collaborateurs.</p>
         </div>
       </div>
       <div>
@@ -235,7 +247,7 @@ footer span{color:var(--rust)}
         <div class="values-list" style="margin-top:1.5rem">
           <div class="value-item">
             <div class="value-title">Concret avant tout</div>
-            <div class="value-desc">Des exemples réels, des outils testés, des usages actionnables dès demain.</div>
+            <div class="value-desc">Des exemples réels, des outils testés, des usages actionnables.</div>
           </div>
           <div class="value-item sage">
             <div class="value-title">Responsable par nature</div>
@@ -514,6 +526,18 @@ animRing();
 document.querySelectorAll('a,button,input,textarea,select,.format-card,.testi-card').forEach(el=>{
   el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
   el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+const hamburger=document.getElementById('hamburger');
+const navMenu=document.getElementById('nav-menu');
+hamburger.addEventListener('click',()=>{
+  hamburger.classList.toggle('open');
+  navMenu.classList.toggle('open');
+});
+navMenu.querySelectorAll('a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    hamburger.classList.remove('open');
+    navMenu.classList.remove('open');
+  });
 });
 function handleForm(e){
   e.preventDefault();
