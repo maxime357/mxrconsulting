@@ -11,6 +11,7 @@
 html{cursor:none;scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--charcoal);font-size:16px;line-height:1.6;overflow-x:hidden}
 #cursor{width:10px;height:10px;background:var(--rust);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:background .2s,width .2s,height .2s}
+@media(hover:none),(pointer:coarse){html{cursor:auto}#cursor,#cursor-ring{display:none}}
 #cursor-ring{width:36px;height:36px;border:1.5px solid var(--rust);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .12s ease-out,top .12s ease-out,width .2s,height .2s,opacity .2s;opacity:.5}
 body.hovering #cursor{width:20px;height:20px;background:var(--sage)}
 body.hovering #cursor-ring{width:48px;height:48px;opacity:.2}
@@ -160,10 +161,11 @@ footer span{color:var(--rust)}
 
 @media(max-width:768px){
   nav{padding:1rem 1.5rem}
-  nav ul{display:none;flex-direction:column;gap:0;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,26,.97);z-index:99;justify-content:center;align-items:center}
+  nav ul{display:none;flex-direction:column;gap:0;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,26,.98);z-index:99;justify-content:center;align-items:center;overflow-y:auto;padding:5rem 2rem}
   nav ul.open{display:flex}
-  nav ul a{font-size:1.2rem;opacity:1;padding:1rem 0;letter-spacing:.1em}
-  .hamburger{display:flex;flex-direction:column;gap:5px;cursor:none;z-index:101;background:none;border:none;padding:4px}
+  nav ul li{width:100%;text-align:center;border-bottom:1px solid rgba(255,255,255,.08)}
+  nav ul a{font-size:1.1rem;opacity:1;padding:1.1rem 0;letter-spacing:.1em;display:block;color:#fff}
+  .hamburger{display:flex;flex-direction:column;gap:5px;cursor:pointer;z-index:101;background:none;border:none;padding:4px}
   .hamburger span{display:block;width:24px;height:2px;background:var(--charcoal);transition:transform .3s,opacity .3s}
   .hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
   .hamburger.open span:nth-child(2){opacity:0}
