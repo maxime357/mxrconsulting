@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Évaluation CRM Haxoneo — Stéphanie, Direction commerciale</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: linear-gradient(135deg, #f0f4f8 0%, #e8eef5 100%); min-height: 100vh; }
+textarea, input[type="text"] { font-family: 'DM Sans', sans-serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+const THEMES = [
+  {
+    id: "dashboard", label: "Dashboard & indicateurs de pilotage", color: "#1F3864",
+    items: [
+      { id: "S.1", text: "Absence d'un dashboard fiable et dynamique pour piloter l'activit\u00e9 quotidienne", desc: "Pas de vue synth\u00e9tique. Les dashboards existants sont d\u00e9ceptifs, incomplets, peu visuels et souvent bugg\u00e9s. Pilotage par silo." },
+      { id: "S.2", text: "Indicateurs de productivit\u00e9 basiques, peu fiables et non consolid\u00e9s", desc: "Seuls deux indicateurs (RDV et appels) sous forme d'histogrammes simples, sans lien avec le CA. Doublons non d\u00e9tect\u00e9s, bugs fr\u00e9quents." },
+      { id: "S.3", text: "Incapacit\u00e9 \u00e0 d\u00e9tecter une baisse anormale d'activit\u00e9 chez un commercial", desc: "Aucune alerte quand un commercial r\u00e9duit son activit\u00e9. D\u00e9tection trop tardive, cons\u00e9quences RH lourdes." },
+      { id: "S.4", text: "Latence trop importante des indicateurs vs. cycle de vente (12-18 mois)", desc: "Les indicateurs sont li\u00e9s au CA d\u00e9clar\u00e9 (trimestriel, avec retard). Il manque des indicateurs interm\u00e9diaires pour anticiper." },
+      { id: "S.5", text: "Pas de capacit\u00e9 de drill-down dans les tableaux de bord", desc: "Impossible de cliquer sur un KPI pour rentrer dans le d\u00e9tail. 30 clics pour acc\u00e9der au d\u00e9tail d'un commercial." },
+      { id: "S.6", text: "Aucun reporting consolid\u00e9 partag\u00e9 avec la direction", desc: "Plus de chiffres sortis ni partag\u00e9s. La direction pilote uniquement via les d\u00e9claratifs fournisseurs." },
+    ],
+  },
+  {
+    id: "segmentation", label: "Segmentation, priorisation & portefeuilles", color: "#2E5FA1",
+    items: [
+      { id: "S.7", text: "Priorisation des adh\u00e9rents faite par silo, sans multicrit\u00e8res", desc: "Distinction fort/faible potentiel par silo (angle TDR, fournisseur, commercial) sans vision crois\u00e9e." },
+      { id: "S.8", text: "Portefeuilles bas\u00e9s sur les SIRET, inadapt\u00e9s aux groupes multi-sites", desc: "Tout fonctionne au SIRET. Les groupes ne sont pas correctement cr\u00e9\u00e9s. Frein au recrutement." },
+      { id: "S.9", text: "Fichiers prospects TDR incomplets \u00e0 l'injection", desc: "Fichiers sans effectifs, sans interlocuteurs, sans d\u00e9tection des groupes. Nettoyage manuel un SIRET \u00e0 la fois." },
+    ],
+  },
+  {
+    id: "transversalite", label: "Coordination inter\u00e9quipe & transversalit\u00e9", color: "#3A7CA5",
+    items: [
+      { id: "S.10", text: "Aucune transversalit\u00e9 de donn\u00e9es entre la dir. commerciale et les autres services", desc: "Aucun \u00e9change structur\u00e9 avec March\u00e9, R\u00e9seaux, Marketing, SAV. Travail en silo total." },
+      { id: "S.11", text: "Fournisseurs absents du CRM \u2014 \u00e9changes critiques uniquement par mail", desc: "Interactions fournisseurs non trac\u00e9es. La triangulaire adh\u00e9rents-commerce-fournisseurs n'est pas support\u00e9e." },
+      { id: "S.12", text: "Coordination marketing-commerce quasi inexistante", desc: "Actions marketing d\u00e9cid\u00e9es sans concertation. Call-to-action sans boucle de retour." },
+    ],
+  },
+  {
+    id: "strategique", label: "Vision strat\u00e9gique & enjeux RH", color: "#1F3864",
+    items: [
+      { id: "S.13", text: "PrestaShop per\u00e7u comme une base de donn\u00e9es statique, pas un CRM", desc: "L'outil est un annuaire o\u00f9 les donn\u00e9es ne peuvent pas \u00eatre mises en mouvement. Incompatible avec un pilotage dynamique." },
+      { id: "S.14", text: "Impact du CRM sur la marque employeur et la motivation des \u00e9quipes", desc: "Le CRM est un crit\u00e8re de recrutement et de fid\u00e9lisation. L'outil actuel g\u00e9n\u00e8re d\u00e9motivation et limite l'attractivit\u00e9." },
+      { id: "S.15", text: "D\u00e9pendance critique \u00e0 R\u00e9mi (IT) \u2014 homme-cl\u00e9 unique", desc: "R\u00e9mi est le seul \u00e0 pouvoir d\u00e9velopper et corriger PrestaShop. Risque structurel en cas d'absence." },
+      { id: "S.16", text: "Temps disproportionn\u00e9 pass\u00e9 sur des t\u00e2ches ADV au lieu du pilotage strat\u00e9gique", desc: "R\u00e9affectations de comptes, compilations manuelles, exports Excel, notes sur papier." },
+      { id: "S.17", text: "Arbitrage strat\u00e9gique non tranch\u00e9 : rester petit ou viser la croissance", desc: "La direction n'a pas clairement choisi entre maintenir PrestaShop ou investir dans un CRM natif." },
+    ],
+  },
+];
+
+const CONTOURNEMENT_OPTIONS = [
+  { code: "A", label: "Aucun contournement", desc: "Bloqu\u00e9e ou abandon", color: "#C62828" },
+  { code: "B", label: "Contournement co\u00fbteux", desc: "Excel, double saisie, process manuel", color: "#E65100" },
+  { code: "C", label: "Contournement acceptable", desc: "Solution fluide, effort limit\u00e9", color: "#F9A825" },
+  { code: "D", label: "Pas n\u00e9cessaire", desc: "Sans cons\u00e9quence directe", color: "#2E7D32" },
+];
+
+const ALL_ITEMS = THEMES.flatMap(t => t.items.map(it => ({...it, theme: t.label, themeColor: t.color})));
+const TOTAL = ALL_ITEMS.length;
+
+function ScoreButton({value, selected, onClick, color}) {
+  return React.createElement("button", {
+    onClick,
+    style: {
+      width: 42, height: 42, borderRadius: 8,
+      border: selected ? `2px solid ${color}` : "2px solid #ddd",
+      background: selected ? color : "#fff",
+      color: selected ? "#fff" : "#666",
+      fontWeight: 700, fontSize: 15, cursor: "pointer",
+      transition: "all 0.15s ease", fontFamily: "'DM Sans', sans-serif",
+    }
+  }, value);
+}
+
+function App() {
+  const [ratings, setRatings] = useState({});
+  const [reformulations, setReformulations] = useState({});
+  const [currentTheme, setCurrentTheme] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+  const [showRef, setShowRef] = useState(false);
+  const topRef = useRef(null);
+
+  const answered = Object.keys(ratings).filter(k => ratings[k] && ratings[k].f && ratings[k].i && ratings[k].c).length;
+  const progress = Math.round((answered / TOTAL) * 100);
+
+  const setRating = (id, type, val) => {
+    setRatings(prev => ({...prev, [id]: {...prev[id], [type]: val}}));
+  };
+  const setReformulation = (id, field, val) => {
+    setReformulations(prev => ({...prev, [id]: {...prev[id], [field]: val}}));
+  };
+
+  const handleExport = () => {
+    const data = {
+      formulaire: "Entretien St\u00e9phanie - Direction commerciale",
+      repondant: "St\u00e9phanie Dumoulin",
+      date_soumission: new Date().toISOString(),
+      nombre_reponses: answered,
+      total_irritants: TOTAL,
+      reponses: ALL_ITEMS.map(item => ({
+        id: item.id,
+        theme: item.theme,
+        irritant_original: item.text,
+        irritant_reformule: reformulations[item.id]?.text || null,
+        contournement_reformule: reformulations[item.id]?.contournement || null,
+        frequence: ratings[item.id]?.f || null,
+        impact: ratings[item.id]?.i || null,
+        score: (ratings[item.id]?.f && ratings[item.id]?.i) ? ratings[item.id].f * ratings[item.id].i : null,
+        contournement: ratings[item.id]?.c || null,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `evaluation_stephanie_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setSubmitted(true);
+  };
+
+  useEffect(() => { topRef.current?.scrollIntoView({behavior: "smooth"}); }, [currentTheme]);
+
+  if (submitted) {
+    return React.createElement("div", {style: {minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center"}},
+      React.createElement("div", {style: {textAlign: "center", padding: 48, background: "#fff", borderRadius: 20, boxShadow: "0 8px 40px rgba(0,0,0,0.08)", maxWidth: 500}},
+        React.createElement("div", {style: {fontSize: 56, marginBottom: 16, color: "#4CAF50"}}, "\u2713"),
+        React.createElement("h2", {style: {color: "#1F3864", fontSize: 24, marginBottom: 12}}, "Merci St\u00e9phanie !"),
+        React.createElement("p", {style: {color: "#666", fontSize: 15, lineHeight: 1.6}},
+          "Votre fichier a \u00e9t\u00e9 t\u00e9l\u00e9charg\u00e9.", React.createElement("br"),
+          "Merci de l\u2019envoyer par email \u00e0 :", React.createElement("br"),
+          React.createElement("strong", {style: {color: "#1F3864"}}, "maxime@mxr-consulting.com")
+        )
+      )
+    );
+  }
+
+  const theme = THEMES[currentTheme];
+
+  return React.createElement("div", null,
+    React.createElement("div", {ref: topRef}),
+
+    // Header
+    React.createElement("div", {style: {background: "linear-gradient(135deg, #1F3864 0%, #2E5FA1 100%)", color: "#fff", padding: "28px 24px 20px", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 4px 20px rgba(0,0,0,0.15)"}},
+      React.createElement("div", {style: {maxWidth: 760, margin: "0 auto"}},
+        React.createElement("div", {style: {fontSize: 11, textTransform: "uppercase", letterSpacing: 2, opacity: 0.7, marginBottom: 4}}, "Diagnostic CRM Haxoneo \u2014 Entretien individuel"),
+        React.createElement("h1", {style: {fontSize: 20, fontWeight: 700, margin: "0 0 4px"}}, "\u00c9valuation des irritants \u2014 St\u00e9phanie, Dir. commerciale"),
+        React.createElement("div", {style: {fontSize: 13, opacity: 0.7, marginBottom: 14}}, "Entretien du 5 mai 2026"),
+
+        React.createElement("div", {style: {display: "flex", alignItems: "center", gap: 12}},
+          React.createElement("div", {style: {flex: 1, height: 6, background: "rgba(255,255,255,0.15)", borderRadius: 3, overflow: "hidden"}},
+            React.createElement("div", {style: {height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #4FC3F7, #81D4FA)", borderRadius: 3, transition: "width 0.4s ease"}})
+          ),
+          React.createElement("span", {style: {fontSize: 13, fontWeight: 600, minWidth: 40}}, `${progress}%`)
+        ),
+
+        React.createElement("div", {style: {display: "flex", gap: 4, marginTop: 14, overflowX: "auto", paddingBottom: 2}},
+          THEMES.map((t, idx) => {
+            const done = t.items.filter(it => ratings[it.id]?.f && ratings[it.id]?.i && ratings[it.id]?.c).length;
+            const isActive = idx === currentTheme;
+            return React.createElement("button", {
+              key: t.id, onClick: () => setCurrentTheme(idx),
+              style: {padding: "6px 12px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
+                background: isActive ? "rgba(255,255,255,0.2)" : "transparent",
+                color: isActive ? "#fff" : "rgba(255,255,255,0.5)", transition: "all 0.2s", fontFamily: "'DM Sans', sans-serif"}
+            }, `${String.fromCharCode(65+idx)}. ${t.label.split(" ")[0]} ${done === t.items.length ? "\u2713" : `${done}/${t.items.length}`}`);
+          })
+        )
+      )
+    ),
+
+    // Ref
+    React.createElement("div", {style: {maxWidth: 760, margin: "16px auto 0", padding: "0 16px"}},
+      React.createElement("button", {onClick: () => setShowRef(!showRef), style: {background: "#fff", border: "1px solid #ddd", borderRadius: 10, padding: "10px 16px", fontSize: 13, cursor: "pointer", color: "#1F3864", fontWeight: 600, width: "100%", fontFamily: "'DM Sans', sans-serif"}},
+        `${showRef ? "\u25be" : "\u25b8"} R\u00e9f\u00e9rentiel de notation (F, I et Contournement)`
+      ),
+      showRef && React.createElement("div", {style: {background: "#fff", border: "1px solid #e0e0e0", borderRadius: 10, padding: 20, marginTop: 8, fontSize: 13, lineHeight: 1.7, color: "#444"}},
+        React.createElement("div", {style: {marginBottom: 12}},
+          React.createElement("strong", {style: {color: "#1F3864"}}, "Fr\u00e9quence (F)"),
+          " \u2014 \u00c0 quelle fr\u00e9quence ce probl\u00e8me affecte-t-il votre travail ? Pour les constats permanents, \u00e9valuez \u00e0 quelle fr\u00e9quence vous en ressentez l\u2019impact.",
+          React.createElement("div", {style: {marginTop: 4, paddingLeft: 8, borderLeft: "3px solid #e0e0e0"}},
+            "1 = Tr\u00e8s rare \u00b7 2 = Ponctuelle \u00b7 3 = R\u00e9guli\u00e8re \u00b7 4 = Fr\u00e9quente \u00b7 5 = Syst\u00e9matique"
+          )
+        ),
+        React.createElement("div", {style: {marginBottom: 12}},
+          React.createElement("strong", {style: {color: "#1F3864"}}, "Impact (I)"),
+          " \u2014 Quel impact sur votre activit\u00e9 ?",
+          React.createElement("div", {style: {marginTop: 4, paddingLeft: 8, borderLeft: "3px solid #e0e0e0"}},
+            "1 = N\u00e9gligeable \u00b7 2 = Mineur \u00b7 3 = Mod\u00e9r\u00e9 \u00b7 4 = Significatif \u00b7 5 = Critique"
+          )
+        ),
+        React.createElement("div", null,
+          React.createElement("strong", {style: {color: "#1F3864"}}, "Contournement"),
+          React.createElement("div", {style: {marginTop: 4, paddingLeft: 8, borderLeft: "3px solid #e0e0e0"}},
+            "A = Aucun (bloqu\u00e9e) \u00b7 B = Co\u00fbteux (Excel, double saisie) \u00b7 C = Acceptable \u00b7 D = Non n\u00e9cessaire"
+          )
+        )
+      )
+    ),
+
+    // Content
+    React.createElement("div", {style: {maxWidth: 760, margin: "16px auto 100px", padding: "0 16px"}},
+      React.createElement("div", {style: {background: theme.color, color: "#fff", padding: "14px 20px", borderRadius: "12px 12px 0 0", fontWeight: 700, fontSize: 15}},
+        `Th\u00e9matique ${String.fromCharCode(65+currentTheme)} \u2014 ${theme.label}`
+      ),
+      React.createElement("div", {style: {background: "#fff", borderRadius: "0 0 12px 12px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)"}},
+        theme.items.map((item, idx) => {
+          const r = ratings[item.id] || {};
+          const ref = reformulations[item.id] || {};
+          const isDone = r.f && r.i && r.c;
+          return React.createElement("div", {key: item.id, style: {padding: "24px 24px", borderBottom: idx < theme.items.length - 1 ? "1px solid #f0f0f0" : "none"}},
+
+            // Header
+            React.createElement("div", {style: {display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 12}},
+              React.createElement("span", {style: {background: isDone ? "#4CAF50" : "#e0e0e0", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", marginTop: 2, transition: "background 0.3s"}}, item.id),
+              React.createElement("div", null,
+                React.createElement("div", {style: {fontWeight: 700, fontSize: 14, color: "#1F3864", marginBottom: 4}}, item.text),
+                React.createElement("div", {style: {fontSize: 13, color: "#777", lineHeight: 1.5}}, item.desc)
+              )
+            ),
+
+            // Reformulation
+            React.createElement("div", {style: {marginBottom: 14}},
+              React.createElement("label", {style: {fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 1}}, "Reformuler l\u2019irritant (optionnel)"),
+              React.createElement("textarea", {
+                value: ref.text || "",
+                onChange: (e) => setReformulation(item.id, "text", e.target.value),
+                placeholder: "Si la formulation ne vous convient pas, proposez une reformulation ici...",
+                style: {width: "100%", marginTop: 4, padding: "8px 12px", border: "1px solid #e0e0e0", borderRadius: 8, fontSize: 13, resize: "vertical", minHeight: 40, maxHeight: 120, color: "#333"}
+              })
+            ),
+
+            // F and I
+            React.createElement("div", {style: {display: "flex", gap: 24, marginBottom: 14, flexWrap: "wrap"}},
+              React.createElement("div", null,
+                React.createElement("div", {style: {fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6}}, "Fr\u00e9quence"),
+                React.createElement("div", {style: {display: "flex", gap: 6}},
+                  [1,2,3,4,5].map(v => React.createElement(ScoreButton, {key: v, value: v, selected: r.f === v, onClick: () => setRating(item.id, "f", v), color: "#2E5FA1"}))
+                )
+              ),
+              React.createElement("div", null,
+                React.createElement("div", {style: {fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6}}, "Impact"),
+                React.createElement("div", {style: {display: "flex", gap: 6}},
+                  [1,2,3,4,5].map(v => React.createElement(ScoreButton, {key: v, value: v, selected: r.i === v, onClick: () => setRating(item.id, "i", v), color: "#C62828"}))
+                )
+              )
+            ),
+
+            // Contournement
+            React.createElement("div", {style: {marginBottom: 8}},
+              React.createElement("div", {style: {fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6}}, "Contournement"),
+              React.createElement("div", {style: {display: "flex", gap: 6, flexWrap: "wrap"}},
+                CONTOURNEMENT_OPTIONS.map(opt =>
+                  React.createElement("button", {
+                    key: opt.code, onClick: () => setRating(item.id, "c", opt.code),
+                    style: {padding: "8px 14px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'DM Sans', sans-serif",
+                      border: r.c === opt.code ? `2px solid ${opt.color}` : "2px solid #ddd",
+                      background: r.c === opt.code ? opt.color : "#fff",
+                      color: r.c === opt.code ? "#fff" : "#666", transition: "all 0.15s"}
+                  }, `${opt.code} \u2014 ${opt.label}`)
+                )
+              )
+            ),
+
+            // Contournement detail
+            React.createElement("div", null,
+              React.createElement("label", {style: {fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 1}}, "Pr\u00e9ciser le contournement (optionnel)"),
+              React.createElement("input", {
+                type: "text", value: ref.contournement || "",
+                onChange: (e) => setReformulation(item.id, "contournement", e.target.value),
+                placeholder: "Comment contournez-vous ce probl\u00e8me concr\u00e8tement ?",
+                style: {width: "100%", marginTop: 4, padding: "8px 12px", border: "1px solid #e0e0e0", borderRadius: 8, fontSize: 13, color: "#333"}
+              })
+            )
+          );
+        })
+      ),
+
+      // Navigation
+      React.createElement("div", {style: {display: "flex", justifyContent: "space-between", marginTop: 20, gap: 12}},
+        React.createElement("button", {
+          onClick: () => setCurrentTheme(Math.max(0, currentTheme - 1)),
+          disabled: currentTheme === 0,
+          style: {padding: "12px 24px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", cursor: currentTheme === 0 ? "default" : "pointer", opacity: currentTheme === 0 ? 0.4 : 1, fontWeight: 600, fontSize: 14, color: "#1F3864", fontFamily: "'DM Sans', sans-serif"}
+        }, "\u2190 Pr\u00e9c\u00e9dent"),
+
+        currentTheme < THEMES.length - 1 ?
+          React.createElement("button", {
+            onClick: () => setCurrentTheme(currentTheme + 1),
+            style: {padding: "12px 24px", borderRadius: 10, border: "none", background: "#1F3864", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 14, fontFamily: "'DM Sans', sans-serif"}
+          }, "Suivant \u2192") :
+          React.createElement("button", {
+            onClick: handleExport, disabled: answered < TOTAL,
+            style: {padding: "12px 28px", borderRadius: 10, border: "none",
+              background: answered >= TOTAL ? "linear-gradient(135deg, #1F3864, #2E5FA1)" : "#ccc",
+              color: "#fff", cursor: answered >= TOTAL ? "pointer" : "default",
+              fontWeight: 700, fontSize: 14, fontFamily: "'DM Sans', sans-serif",
+              boxShadow: answered >= TOTAL ? "0 4px 15px rgba(31,56,100,0.3)" : "none"}
+          }, `Exporter mes r\u00e9ponses (${answered}/${TOTAL})`)
+      )
+    )
+  );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById("root"));
+</script>
+</body>
+</html>
