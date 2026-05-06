@@ -9,284 +9,162 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'DM Sans', sans-serif; background: linear-gradient(135deg, #f0f4f8 0%, #e8eef5 100%); min-height: 100vh; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4f8 0%,#e8eef5 100%);min-height:100vh}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useRef, useEffect } = React;
-
-const THEMES = [
-  {
-    id: "prospection", label: "Prospection & Qualification des leads", color: "#1F3864",
-    items: [
-      { id: "AC-01", text: "Base de données prospects incomplète et obsolète", desc: "Les informations de base manquent sur les fiches (effectifs, contact, téléphone, activité). Les interlocuteurs deviennent rapidement obsolètes et ne sont pas mis à jour." },
-      { id: "AC-02", text: "Identification des groupes de sociétés impossible", desc: "L'outil fonctionne uniquement au SIRET. Impossible de détecter si un adhérent fait partie d'un groupe multi-sites." },
-      { id: "AC-03", text: "Doubles et triples saisies à chaque interaction", desc: "Pour chaque appel : créer une tâche de consignation ET une tâche de relance, en dupliquant les informations. Les tentatives de contact doivent aussi être notées manuellement." },
-      { id: "AC-04", text: "Absence d'envoi de mails automatisés depuis le CRM", desc: "Aucune intégration Gmail : copier-coller de l'adresse, rédaction manuelle dans Gmail. Pas de templates, pas de suivi email dans le CRM." },
-      { id: "AC-05", text: "Impossible de prioriser les contacts", desc: "Pas de scoring, pas de tri, pas de tableau de bord pour lister les priorités. Aucune vision du taux de contact du portefeuille." },
-      { id: "AC-06", text: "Fiches prospects non fiables — frein à l'action quotidienne", desc: "Les données ne sont pas à jour, ce qui freine la mise en action et crée un sentiment de défiance envers l'outil." },
-      { id: "AC-07", text: "Cartographie géographique peu fonctionnelle", desc: "L'outil géographique existe mais est très peu utilisable pour planifier les déplacements terrain." },
-      { id: "AC-08", text: "Outil Lusha intégré moins performant que la version externe", desc: "Le bouton Lusha dans PrestaShop trouve moins de contacts que l'application externe." },
-    ],
-  },
-  {
-    id: "pipeline", label: "Suivi pipeline & actions post-contact", color: "#2E5FA1",
-    items: [
-      { id: "AC-09", text: "Doubles saisies dans le pipeline", desc: "Consignations d'échange en doublon de la qualification de tâche. Chaque tâche terminée doit être suivie d'une nouvelle tâche." },
-      { id: "AC-10", text: "Pas de vision globale sur les comptes complexes", desc: "Sur un groupe multi-sujets / multi-interlocuteurs, 10+ tâches sans frise chronologique ni vue synthétique." },
-      { id: "AC-11", text: "Pas de synthèse ni de catégorisation des échanges", desc: "Aucun résumé des historiques d'appels. Toutes les consignations sont mélangées, obligeant à tout relire." },
-      { id: "AC-12", text: "Aucune connexion Gmail — PrestaShop", desc: "Copier-coller des mails entre Gmail et PrestaShop. Aucune traçabilité email dans le CRM." },
-      { id: "AC-13", text: "Pollution visuelle et surcharge d'informations inutiles", desc: "Contacts archivés toujours visibles, pages surchargées de données inutiles, pas de hiérarchie visuelle." },
-      { id: "AC-14", text: "Ringover non intégré : appels non reconnus", desc: "Les appels entrants ne sont pas identifiés. Les appels sortants ne sont pas enregistrés automatiquement." },
-      { id: "AC-15", text: "Impossible de stocker des documents sur une fiche adhérent", desc: "Pas de possibilité de charger des PJ (analyses, contrats, balances). Tout reste sur le PC ou Drive." },
-      { id: "AC-16", text: "Consignations d'échange stockées au mauvais endroit", desc: "Les consignations ne se rattachent pas au bon contact ou à la bonne société." },
-      { id: "AC-17", text: "Opportunités oubliées car pas visibles", desc: "Le dashboard des opportunités ne se met pas à jour. Les opportunités disparaissent du flux quotidien." },
-      { id: "AC-18", text: "Aucune automatisation des relances (next step)", desc: "Chaque relance doit être programmée manuellement, alors que les règles sont récurrentes." },
-      { id: "AC-19", text: "Pilotage d'activité impossible hors tâches", desc: "Hors des tâches, rien ne permet de piloter une activité ou un portefeuille." },
-      { id: "AC-20", text: "Suivi des leads fournisseurs défaillant", desc: "Pas de visibilité sur les retours des fournisseurs ni les validations de dossiers." },
-      { id: "AC-21", text: "Gestion des évolutions de groupes ultra chronophage", desc: "Scissions, rachats : duplication manuelle de toutes les tâches, consignations et contacts." },
-      { id: "AC-22", text: "Pas de suivi clair du cycle de vie adhérent", desc: "Pas de vue prospect → lead → adhérent → actif → en risque → perdu." },
-    ],
-  },
-  {
-    id: "adhesion", label: "Adhésion, contractualisation & activation", color: "#3A7CA5",
-    items: [
-      { id: "AC-23", text: "Pas de création automatique de tâche après signature", desc: "Aucune tâche ne se crée automatiquement pour le premier appel de bienvenue post-adhésion." },
-      { id: "AC-24", text: "Rattachements fournisseurs manuels et problématiques", desc: "Rattachement SIRET par SIRET. Des rattachements non consentis créent des réclamations." },
-    ],
-  },
-  {
-    id: "fidelisation", label: "Développement du compte & fidélisation", color: "#4A90C4",
-    items: [
-      { id: "AC-25", text: "Pas d'alerte sur les échéances de contrats", desc: "Aucune alerte pour prévenir qu'un contrat arrive à échéance. Risque de perte de CA." },
-      { id: "AC-26", text: "Aucune automatisation des relances de fidélisation", desc: "Pas de workflow post-adhésion (3 mois, 6 mois, 1 an). Tout repose sur la mémoire individuelle." },
-      { id: "AC-27", text: "Gestion des interlocuteurs multiples sans vue adaptée", desc: "Pas de matrice pour piloter qui appeler, quand, sur quel sujet sur les comptes multi-interlocuteurs." },
-      { id: "AC-28", text: "Préparation des rendez-vous trop longue", desc: "Informations dispersées entre onglets, Drive, emails. Pas de synthèse pré-rendez-vous." },
-      { id: "AC-29", text: "Aucune visibilité sur le taux de contact fidélisation", desc: "Impossible de savoir quel % du portefeuille a été contacté sur une période donnée." },
-      { id: "AC-30", text: "Identification des opportunités d'upsell impossible", desc: "Pas de mécanisme pour détecter les nouvelles catégories à activer ou les adhérents à développer." },
-      { id: "AC-31", text: "Transférabilité des dossiers quasi nulle", desc: "Quand un commercial part, aucune documentation ne permet de reprendre son portefeuille." },
-      { id: "AC-32", text: "Charge mentale excessive liée aux tâches", desc: "Multiplication des tâches (jusqu'à 140), créant angoisse et abandon de l'outil." },
-      { id: "AC-33", text: "Pas de critères clairs pour prioriser la fidélisation", desc: "Aucun signalement des priorités (pépites, risques de départ). On avance à tâtons." },
-    ],
-  },
-  {
-    id: "pilotage", label: "Pilotage, reporting & management", color: "#1F3864",
-    items: [
-      { id: "AC-34", text: "Pas de tableau de bord managérial", desc: "Aucun dashboard clair pour voir les priorités de la semaine, les alertes, les adhérents à relancer." },
-      { id: "AC-35", text: "Double manipulation pour remonter dans les statistiques", desc: "Il faut clôturer une tâche + en recréer une pour que le contact soit comptabilisé dans les stats." },
-      { id: "AC-36", text: "Pas de filtrage des tâches par type d'activité", desc: "Impossible de distinguer prospection, fidélisation, tâches internes. Pas de mesure de répartition de l'effort." },
-    ],
-  },
-  {
-    id: "transverse", label: "Transverse : ergonomie, données & intégrations", color: "#2E5FA1",
-    items: [
-      { id: "AC-37", text: "Recherche fastidieuse, pas de recherche approximative", desc: "Il faut saisir la raison sociale exactement. Pas de recherche floue (fuzzy search)." },
-      { id: "AC-38", text: "Ergonomie dégradée : trop d'infos, pas de hiérarchie", desc: "Fiche adhérent surchargée, intitulés de postes et types de RDV non adaptés au contexte Haxoneo." },
-      { id: "AC-39", text: "Données d'activité officielle non mises à jour", desc: "RJ, liquidations, cessations, déménagements non mis à jour automatiquement. Sociétés fermées toujours visibles." },
-      { id: "AC-40", text: "Absence d'intégration des outils quotidiens", desc: "Ringover, Gmail, Calendly, Google Agenda : rien n'est connecté au CRM." },
-      { id: "AC-41", text: "Évolutions du CRM sans documentation ni tutoriels", desc: "Beaucoup de mises à jour mais pas de doc partagée. Difficile de savoir ce qui existe." },
-      { id: "AC-42", text: "Dictée vocale peu fiable sur les consignations", desc: "Mauvaise interprétation des propos, nécessitant des corrections manuelles." },
-    ],
-  },
+const{useState,useRef,useEffect}=React;
+const THEMES=[
+{id:"prospection",label:"Prospection & Qualification des leads",color:"#1F3864",items:[
+{id:"AC-01",text:"Base de données prospects incomplète et obsolète",desc:"Les informations de base manquent sur les fiches (effectifs, contact, téléphone, activité). Les interlocuteurs deviennent rapidement obsolètes et ne sont pas mis à jour."},
+{id:"AC-02",text:"Identification des groupes de sociétés impossible",desc:"L'outil fonctionne uniquement au SIRET. Impossible de détecter si un adhérent fait partie d'un groupe multi-sites."},
+{id:"AC-03",text:"Doubles et triples saisies à chaque interaction",desc:"Pour chaque appel : créer une tâche de consignation ET une tâche de relance, en dupliquant les informations. Les tentatives de contact doivent aussi être notées manuellement."},
+{id:"AC-04",text:"Absence d'envoi de mails automatisés depuis le CRM",desc:"Aucune intégration Gmail : copier-coller de l'adresse, rédaction manuelle dans Gmail. Pas de templates, pas de suivi email dans le CRM."},
+{id:"AC-05",text:"Impossible de prioriser les contacts",desc:"Pas de scoring, pas de tri, pas de tableau de bord pour lister les priorités. Aucune vision du taux de contact du portefeuille."},
+{id:"AC-06",text:"Fiches prospects non fiables — frein à l'action quotidienne",desc:"Les données ne sont pas à jour, ce qui freine la mise en action et crée un sentiment de défiance envers l'outil."},
+{id:"AC-07",text:"Cartographie géographique peu fonctionnelle",desc:"L'outil géographique existe mais est très peu utilisable pour planifier les déplacements terrain."},
+{id:"AC-08",text:"Outil Lusha intégré moins performant que la version externe",desc:"Le bouton Lusha dans PrestaShop trouve moins de contacts que l'application externe."},
+]},
+{id:"pipeline",label:"Suivi pipeline & actions post-contact",color:"#2E5FA1",items:[
+{id:"AC-09",text:"Doubles saisies dans le pipeline",desc:"Consignations d'échange en doublon de la qualification de tâche. Chaque tâche terminée doit être suivie d'une nouvelle tâche."},
+{id:"AC-10",text:"Pas de vision globale sur les comptes complexes",desc:"Sur un groupe multi-sujets / multi-interlocuteurs, 10+ tâches sans frise chronologique ni vue synthétique."},
+{id:"AC-11",text:"Pas de synthèse ni de catégorisation des échanges",desc:"Aucun résumé des historiques d'appels. Toutes les consignations sont mélangées, obligeant à tout relire."},
+{id:"AC-12",text:"Aucune connexion Gmail — PrestaShop",desc:"Copier-coller des mails entre Gmail et PrestaShop. Aucune traçabilité email dans le CRM."},
+{id:"AC-13",text:"Pollution visuelle et surcharge d'informations inutiles",desc:"Contacts archivés toujours visibles, pages surchargées de données inutiles, pas de hiérarchie visuelle."},
+{id:"AC-14",text:"Ringover non intégré : appels non reconnus",desc:"Les appels entrants ne sont pas identifiés. Les appels sortants ne sont pas enregistrés automatiquement."},
+{id:"AC-15",text:"Impossible de stocker des documents sur une fiche adhérent",desc:"Pas de possibilité de charger des PJ (analyses, contrats, balances). Tout reste sur le PC ou Drive."},
+{id:"AC-16",text:"Consignations d'échange stockées au mauvais endroit",desc:"Les consignations ne se rattachent pas au bon contact ou à la bonne société."},
+{id:"AC-17",text:"Opportunités oubliées car pas visibles",desc:"Le dashboard des opportunités ne se met pas à jour. Les opportunités disparaissent du flux quotidien."},
+{id:"AC-18",text:"Aucune automatisation des relances (next step)",desc:"Chaque relance doit être programmée manuellement, alors que les règles sont récurrentes."},
+{id:"AC-19",text:"Pilotage d'activité impossible hors tâches",desc:"Hors des tâches, rien ne permet de piloter une activité ou un portefeuille."},
+{id:"AC-20",text:"Suivi des leads fournisseurs défaillant",desc:"Pas de visibilité sur les retours des fournisseurs ni les validations de dossiers."},
+{id:"AC-21",text:"Gestion des évolutions de groupes ultra chronophage",desc:"Scissions, rachats : duplication manuelle de toutes les tâches, consignations et contacts."},
+{id:"AC-22",text:"Pas de suivi clair du cycle de vie adhérent",desc:"Pas de vue prospect → lead → adhérent → actif → en risque → perdu."},
+]},
+{id:"adhesion",label:"Adhésion, contractualisation & activation",color:"#3A7CA5",items:[
+{id:"AC-23",text:"Pas de création automatique de tâche après signature",desc:"Aucune tâche ne se crée automatiquement pour le premier appel de bienvenue post-adhésion."},
+{id:"AC-24",text:"Rattachements fournisseurs manuels et problématiques",desc:"Rattachement SIRET par SIRET. Des rattachements non consentis créent des réclamations."},
+]},
+{id:"fidelisation",label:"Développement du compte & fidélisation",color:"#4A90C4",items:[
+{id:"AC-25",text:"Pas d'alerte sur les échéances de contrats",desc:"Aucune alerte pour prévenir qu'un contrat arrive à échéance. Risque de perte de CA."},
+{id:"AC-26",text:"Aucune automatisation des relances de fidélisation",desc:"Pas de workflow post-adhésion (3 mois, 6 mois, 1 an). Tout repose sur la mémoire individuelle."},
+{id:"AC-27",text:"Gestion des interlocuteurs multiples sans vue adaptée",desc:"Pas de matrice pour piloter qui appeler, quand, sur quel sujet sur les comptes multi-interlocuteurs."},
+{id:"AC-28",text:"Préparation des rendez-vous trop longue",desc:"Informations dispersées entre onglets, Drive, emails. Pas de synthèse pré-rendez-vous."},
+{id:"AC-29",text:"Aucune visibilité sur le taux de contact fidélisation",desc:"Impossible de savoir quel % du portefeuille a été contacté sur une période donnée."},
+{id:"AC-30",text:"Identification des opportunités d'upsell impossible",desc:"Pas de mécanisme pour détecter les nouvelles catégories à activer ou les adhérents à développer."},
+{id:"AC-31",text:"Transférabilité des dossiers quasi nulle",desc:"Quand un commercial part, aucune documentation ne permet de reprendre son portefeuille."},
+{id:"AC-32",text:"Charge mentale excessive liée aux tâches",desc:"Multiplication des tâches (jusqu'à 140), créant angoisse et abandon de l'outil."},
+{id:"AC-33",text:"Pas de critères clairs pour prioriser la fidélisation",desc:"Aucun signalement des priorités (pépites, risques de départ). On avance à tâtons."},
+]},
+{id:"pilotage",label:"Pilotage, reporting & management",color:"#1F3864",items:[
+{id:"AC-34",text:"Pas de tableau de bord managérial",desc:"Aucun dashboard clair pour voir les priorités de la semaine, les alertes, les adhérents à relancer."},
+{id:"AC-35",text:"Double manipulation pour remonter dans les statistiques",desc:"Il faut clôturer une tâche + en recréer une pour que le contact soit comptabilisé dans les stats."},
+{id:"AC-36",text:"Pas de filtrage des tâches par type d'activité",desc:"Impossible de distinguer prospection, fidélisation, tâches internes."},
+]},
+{id:"transverse",label:"Transverse : ergonomie, données & intégrations",color:"#2E5FA1",items:[
+{id:"AC-37",text:"Recherche fastidieuse, pas de recherche approximative",desc:"Il faut saisir la raison sociale exactement. Pas de recherche floue."},
+{id:"AC-38",text:"Ergonomie dégradée : trop d'infos, pas de hiérarchie",desc:"Fiche adhérent surchargée, intitulés non adaptés au contexte Haxoneo."},
+{id:"AC-39",text:"Données d'activité officielle non mises à jour",desc:"RJ, liquidations, cessations non mis à jour automatiquement. Sociétés fermées toujours visibles."},
+{id:"AC-40",text:"Absence d'intégration des outils quotidiens",desc:"Ringover, Gmail, Calendly, Google Agenda : rien n'est connecté au CRM."},
+{id:"AC-41",text:"Évolutions du CRM sans documentation ni tutoriels",desc:"Beaucoup de mises à jour mais pas de doc partagée."},
+{id:"AC-42",text:"Dictée vocale peu fiable sur les consignations",desc:"Mauvaise interprétation des propos, nécessitant des corrections manuelles."},
+]},
 ];
-
-const ALL_ITEMS = THEMES.flatMap(t => t.items.map(it => ({...it, theme: t.label, themeColor: t.color})));
-const TOTAL = ALL_ITEMS.length;
-
-function ScoreButton({value, selected, onClick, color}) {
-  return React.createElement("button", {
-    onClick,
-    style: {
-      width: 42, height: 42, borderRadius: 8,
-      border: selected ? `2px solid ${color}` : "2px solid #ddd",
-      background: selected ? color : "#fff",
-      color: selected ? "#fff" : "#666",
-      fontWeight: 700, fontSize: 15, cursor: "pointer",
-      transition: "all 0.15s ease", fontFamily: "'DM Sans', sans-serif",
-    }
-  }, value);
+const CO=[{code:"A",label:"Aucun contournement",color:"#C62828"},{code:"B",label:"Contournement co\u00fbteux",color:"#E65100"},{code:"C",label:"Contournement acceptable",color:"#F9A825"},{code:"D",label:"Non n\u00e9cessaire",color:"#2E7D32"}];
+const ALL=THEMES.flatMap(t=>t.items.map(it=>({...it,theme:t.label})));
+const TOTAL=ALL.length;
+function SB({value,selected,onClick,color}){return React.createElement("button",{onClick,style:{width:42,height:42,borderRadius:8,border:selected?`2px solid ${color}`:"2px solid #ddd",background:selected?color:"#fff",color:selected?"#fff":"#666",fontWeight:700,fontSize:15,cursor:"pointer",transition:"all 0.15s",fontFamily:"'DM Sans',sans-serif"}},value)}
+function CB({code,label,color,selected,onClick}){return React.createElement("button",{onClick,style:{padding:"6px 14px",borderRadius:8,border:selected?`2px solid ${color}`:"2px solid #ddd",background:selected?color:"#fff",color:selected?"#fff":"#666",fontWeight:600,fontSize:12,cursor:"pointer",transition:"all 0.15s",fontFamily:"'DM Sans',sans-serif"}},`${code} \u2014 ${label}`)}
+function App(){
+const[ratings,setRatings]=useState({});
+const[cur,setCur]=useState(0);
+const[done,setDone]=useState(false);
+const[showRef,setShowRef]=useState(false);
+const topR=useRef(null);
+const ans=Object.keys(ratings).filter(k=>ratings[k]&&ratings[k].f&&ratings[k].i&&ratings[k].c).length;
+const pct=Math.round((ans/TOTAL)*100);
+const set=(id,t,v)=>setRatings(p=>({...p,[id]:{...p[id],[t]:v}}));
+const send=()=>{
+const data={formulaire:"Atelier Collectif CRM Haxoneo",date_soumission:new Date().toISOString(),nombre_reponses:ans,total_irritants:TOTAL,
+reponses:ALL.map(item=>({id:item.id,theme:item.theme,irritant:item.text,frequence:ratings[item.id]?.f||null,impact:ratings[item.id]?.i||null,score:(ratings[item.id]?.f&&ratings[item.id]?.i)?ratings[item.id].f*ratings[item.id].i:null,contournement:ratings[item.id]?.c||null}))};
+const j=JSON.stringify(data,null,2);
+const s=encodeURIComponent("Evaluation CRM Haxoneo - Atelier collectif");
+const b=encodeURIComponent("Bonjour Maxime,\n\nVoici mon évaluation des irritants CRM :\n\n"+j+"\n\nCordialement");
+window.location.href=`mailto:maxime@mxr-consulting.com?subject=${s}&body=${b}`;
+setDone(true);
+};
+useEffect(()=>{topR.current?.scrollIntoView({behavior:"smooth"})},[cur]);
+if(done)return React.createElement("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}},
+React.createElement("div",{style:{textAlign:"center",padding:48,background:"#fff",borderRadius:20,boxShadow:"0 8px 40px rgba(0,0,0,0.08)",maxWidth:520}},
+React.createElement("div",{style:{fontSize:56,marginBottom:16,color:"#4CAF50"}},"\u2713"),
+React.createElement("h2",{style:{color:"#1F3864",fontSize:24,marginBottom:12}},"Merci pour votre évaluation !"),
+React.createElement("p",{style:{color:"#666",fontSize:15,lineHeight:1.6}},
+"Votre client mail s'est ouvert avec vos réponses pré-remplies.",React.createElement("br"),
+"Il ne vous reste plus qu'à cliquer ",React.createElement("strong",null,"Envoyer")," dans votre messagerie.",React.createElement("br"),React.createElement("br"),
+React.createElement("span",{style:{fontSize:13,color:"#999"}},"Si votre messagerie ne s'est pas ouverte, contactez maxime@mxr-consulting.com"))));
+const theme=THEMES[cur];
+return React.createElement("div",null,
+React.createElement("div",{ref:topR}),
+// Header
+React.createElement("div",{style:{background:"#1F3864",color:"#fff",padding:"28px 24px 20px",position:"sticky",top:0,zIndex:100,boxShadow:"0 4px 20px rgba(0,0,0,0.15)"}},
+React.createElement("div",{style:{maxWidth:720,margin:"0 auto"}},
+React.createElement("div",{style:{fontSize:11,textTransform:"uppercase",letterSpacing:2,opacity:0.7,marginBottom:4}},"Diagnostic CRM Haxoneo"),
+React.createElement("h1",{style:{fontSize:20,fontWeight:700,margin:"0 0 14px"}},"Évaluation des irritants — Atelier collectif"),
+React.createElement("div",{style:{display:"flex",alignItems:"center",gap:12}},
+React.createElement("div",{style:{flex:1,height:6,background:"rgba(255,255,255,0.15)",borderRadius:3,overflow:"hidden"}},
+React.createElement("div",{style:{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#4FC3F7,#81D4FA)",borderRadius:3,transition:"width 0.4s"}})),
+React.createElement("span",{style:{fontSize:13,fontWeight:600,minWidth:40}},`${pct}%`)),
+React.createElement("div",{style:{display:"flex",gap:4,marginTop:14,overflowX:"auto",paddingBottom:2}},
+THEMES.map((t,i)=>{const d=t.items.filter(it=>ratings[it.id]?.f&&ratings[it.id]?.i&&ratings[it.id]?.c).length;const a=i===cur;
+return React.createElement("button",{key:t.id,onClick:()=>setCur(i),style:{padding:"6px 12px",borderRadius:6,border:"none",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap",background:a?"rgba(255,255,255,0.2)":"transparent",color:a?"#fff":"rgba(255,255,255,0.5)",transition:"all 0.2s",fontFamily:"'DM Sans',sans-serif"}},
+`${i+1}. ${t.label.split(" ")[0]} ${d===t.items.length?"\u2713":`${d}/${t.items.length}`}`)})))),
+// Ref
+React.createElement("div",{style:{maxWidth:720,margin:"16px auto 0",padding:"0 16px"}},
+React.createElement("button",{onClick:()=>setShowRef(!showRef),style:{background:"#fff",border:"1px solid #ddd",borderRadius:10,padding:"10px 16px",fontSize:13,cursor:"pointer",color:"#1F3864",fontWeight:600,width:"100%",fontFamily:"'DM Sans',sans-serif"}},
+`${showRef?"\u25be":"\u25b8"} Référentiel de notation`),
+showRef&&React.createElement("div",{style:{background:"#fff",border:"1px solid #e0e0e0",borderRadius:10,padding:20,marginTop:8,fontSize:13,lineHeight:1.7,color:"#444"}},
+React.createElement("div",{style:{marginBottom:12}},React.createElement("strong",{style:{color:"#2E5FA1"}},"Fréquence (F)")," — À quelle fréquence ce problème affecte-t-il votre travail ? Pour les constats permanents, évaluez à quelle fréquence vous en ressentez l'impact.",
+React.createElement("div",{style:{marginTop:4,paddingLeft:8,borderLeft:"3px solid #e0e0e0"}},"1 = Très rare · 2 = Ponctuelle · 3 = Régulière · 4 = Fréquente · 5 = Systématique")),
+React.createElement("div",{style:{marginBottom:12}},React.createElement("strong",{style:{color:"#C62828"}},"Impact (I)")," — Quel impact sur votre activité ?",
+React.createElement("div",{style:{marginTop:4,paddingLeft:8,borderLeft:"3px solid #e0e0e0"}},"1 = Négligeable · 2 = Mineur · 3 = Modéré · 4 = Significatif · 5 = Critique")),
+React.createElement("div",null,React.createElement("strong",{style:{color:"#1F3864"}},"Contournement")," — Comment gérez-vous ce problème ?",
+React.createElement("div",{style:{marginTop:4,paddingLeft:8,borderLeft:"3px solid #e0e0e0"}},
+React.createElement("span",{style:{color:"#C62828",fontWeight:600}},"A")," = Aucun (bloqué) · ",
+React.createElement("span",{style:{color:"#E65100",fontWeight:600}},"B")," = Coûteux (Excel, double saisie) · ",
+React.createElement("span",{style:{color:"#F9A825",fontWeight:600}},"C")," = Acceptable · ",
+React.createElement("span",{style:{color:"#2E7D32",fontWeight:600}},"D")," = Non nécessaire")))),
+// Items
+React.createElement("div",{style:{maxWidth:720,margin:"16px auto 100px",padding:"0 16px"}},
+React.createElement("div",{style:{background:theme.color,color:"#fff",padding:"14px 20px",borderRadius:"12px 12px 0 0",fontWeight:700,fontSize:15}},`Thématique ${cur+1}/${THEMES.length} — ${theme.label}`),
+React.createElement("div",{style:{background:"#fff",borderRadius:"0 0 12px 12px",boxShadow:"0 4px 20px rgba(0,0,0,0.06)"}},
+theme.items.map((item,idx)=>{const r=ratings[item.id]||{};const ok=r.f&&r.i&&r.c;
+return React.createElement("div",{key:item.id,style:{padding:"20px 24px",borderBottom:idx<theme.items.length-1?"1px solid #f0f0f0":"none"}},
+React.createElement("div",{style:{display:"flex",alignItems:"flex-start",gap:12,marginBottom:10}},
+React.createElement("span",{style:{background:ok?"#4CAF50":"#e0e0e0",color:"#fff",borderRadius:6,padding:"2px 8px",fontSize:11,fontWeight:700,whiteSpace:"nowrap",marginTop:2,transition:"background 0.3s"}},item.id),
+React.createElement("div",null,
+React.createElement("div",{style:{fontWeight:700,fontSize:14,color:"#1F3864",marginBottom:4}},item.text),
+React.createElement("div",{style:{fontSize:13,color:"#777",lineHeight:1.5}},item.desc))),
+React.createElement("div",{style:{display:"flex",gap:20,marginTop:12,flexWrap:"wrap",alignItems:"flex-end"}},
+React.createElement("div",null,React.createElement("div",{style:{fontSize:11,fontWeight:700,color:"#999",textTransform:"uppercase",letterSpacing:1,marginBottom:6}},"Fréquence"),
+React.createElement("div",{style:{display:"flex",gap:5}},[1,2,3,4,5].map(v=>React.createElement(SB,{key:v,value:v,selected:r.f===v,onClick:()=>set(item.id,"f",v),color:"#2E5FA1"})))),
+React.createElement("div",null,React.createElement("div",{style:{fontSize:11,fontWeight:700,color:"#999",textTransform:"uppercase",letterSpacing:1,marginBottom:6}},"Impact"),
+React.createElement("div",{style:{display:"flex",gap:5}},[1,2,3,4,5].map(v=>React.createElement(SB,{key:v,value:v,selected:r.i===v,onClick:()=>set(item.id,"i",v),color:"#C62828"})))),
+React.createElement("div",null,React.createElement("div",{style:{fontSize:11,fontWeight:700,color:"#999",textTransform:"uppercase",letterSpacing:1,marginBottom:6}},"Contournement"),
+React.createElement("div",{style:{display:"flex",gap:5,flexWrap:"wrap"}},CO.map(o=>React.createElement(CB,{key:o.code,code:o.code,label:o.label,color:o.color,selected:r.c===o.code,onClick:()=>set(item.id,"c",o.code)}))))))})
+),
+// Nav
+React.createElement("div",{style:{display:"flex",justifyContent:"space-between",marginTop:20,gap:12}},
+React.createElement("button",{onClick:()=>setCur(Math.max(0,cur-1)),disabled:cur===0,
+style:{padding:"12px 24px",borderRadius:10,border:"1px solid #ddd",background:"#fff",cursor:cur===0?"default":"pointer",opacity:cur===0?0.4:1,fontWeight:600,fontSize:14,color:"#1F3864",fontFamily:"'DM Sans',sans-serif"}},"\u2190 Précédent"),
+cur<THEMES.length-1?
+React.createElement("button",{onClick:()=>setCur(cur+1),style:{padding:"12px 24px",borderRadius:10,border:"none",background:"#1F3864",color:"#fff",cursor:"pointer",fontWeight:600,fontSize:14,fontFamily:"'DM Sans',sans-serif"}},"Suivant \u2192"):
+React.createElement("button",{onClick:send,disabled:ans<TOTAL,
+style:{padding:"12px 28px",borderRadius:10,border:"none",background:ans>=TOTAL?"linear-gradient(135deg,#1F3864,#2E5FA1)":"#ccc",color:"#fff",cursor:ans>=TOTAL?"pointer":"default",fontWeight:700,fontSize:14,fontFamily:"'DM Sans',sans-serif",boxShadow:ans>=TOTAL?"0 4px 15px rgba(31,56,100,0.3)":"none"}},`\u2709 Envoyer mes réponses (${ans}/${TOTAL})`))));
 }
-
-function App() {
-  const [ratings, setRatings] = useState({});
-  const [currentTheme, setCurrentTheme] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
-  const [showRef, setShowRef] = useState(false);
-  const topRef = useRef(null);
-
-  const answered = Object.keys(ratings).filter(k => ratings[k] && ratings[k].f && ratings[k].i).length;
-  const progress = Math.round((answered / TOTAL) * 100);
-
-  const setRating = (id, type, val) => {
-    setRatings(prev => ({...prev, [id]: {...prev[id], [type]: val}}));
-  };
-
-  const handleExport = () => {
-    const data = {
-      formulaire: "Atelier Collectif CRM Haxoneo",
-      date_soumission: new Date().toISOString(),
-      nombre_reponses: answered,
-      total_irritants: TOTAL,
-      reponses: ALL_ITEMS.map(item => ({
-        id: item.id,
-        theme: item.theme,
-        irritant: item.text,
-        frequence: ratings[item.id]?.f || null,
-        impact: ratings[item.id]?.i || null,
-        score: (ratings[item.id]?.f && ratings[item.id]?.i) ? ratings[item.id].f * ratings[item.id].i : null,
-      })),
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `evaluation_atelier_collectif_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    setSubmitted(true);
-  };
-
-  useEffect(() => { topRef.current?.scrollIntoView({behavior: "smooth"}); }, [currentTheme]);
-
-  if (submitted) {
-    return React.createElement("div", {style: {minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center"}},
-      React.createElement("div", {style: {textAlign: "center", padding: 48, background: "#fff", borderRadius: 20, boxShadow: "0 8px 40px rgba(0,0,0,0.08)", maxWidth: 500}},
-        React.createElement("div", {style: {fontSize: 56, marginBottom: 16, color: "#4CAF50"}}, "\u2713"),
-        React.createElement("h2", {style: {color: "#1F3864", fontSize: 24, marginBottom: 12}}, "Merci pour votre \u00e9valuation !"),
-        React.createElement("p", {style: {color: "#666", fontSize: 15, lineHeight: 1.6}},
-          "Votre fichier a \u00e9t\u00e9 t\u00e9l\u00e9charg\u00e9.",
-          React.createElement("br"),
-          "Merci de l\u2019envoyer par email \u00e0 :",
-          React.createElement("br"),
-          React.createElement("strong", {style: {color: "#1F3864"}}, "maxime@mxr-consulting.com")
-        )
-      )
-    );
-  }
-
-  const theme = THEMES[currentTheme];
-
-  return React.createElement("div", null,
-    React.createElement("div", {ref: topRef}),
-
-    // Header sticky
-    React.createElement("div", {style: {background: "#1F3864", color: "#fff", padding: "28px 24px 20px", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 4px 20px rgba(0,0,0,0.15)"}},
-      React.createElement("div", {style: {maxWidth: 720, margin: "0 auto"}},
-        React.createElement("div", {style: {fontSize: 11, textTransform: "uppercase", letterSpacing: 2, opacity: 0.7, marginBottom: 4}}, "Diagnostic CRM Haxoneo"),
-        React.createElement("h1", {style: {fontSize: 20, fontWeight: 700, margin: "0 0 14px"}}, "\u00c9valuation des irritants \u2014 Atelier collectif"),
-
-        // Progress
-        React.createElement("div", {style: {display: "flex", alignItems: "center", gap: 12}},
-          React.createElement("div", {style: {flex: 1, height: 6, background: "rgba(255,255,255,0.15)", borderRadius: 3, overflow: "hidden"}},
-            React.createElement("div", {style: {height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #4FC3F7, #81D4FA)", borderRadius: 3, transition: "width 0.4s ease"}})
-          ),
-          React.createElement("span", {style: {fontSize: 13, fontWeight: 600, minWidth: 40}}, `${progress}%`)
-        ),
-
-        // Tabs
-        React.createElement("div", {style: {display: "flex", gap: 4, marginTop: 14, overflowX: "auto", paddingBottom: 2}},
-          THEMES.map((t, idx) => {
-            const done = t.items.filter(it => ratings[it.id]?.f && ratings[it.id]?.i).length;
-            const isActive = idx === currentTheme;
-            return React.createElement("button", {
-              key: t.id, onClick: () => setCurrentTheme(idx),
-              style: {padding: "6px 12px", borderRadius: 6, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap",
-                background: isActive ? "rgba(255,255,255,0.2)" : "transparent",
-                color: isActive ? "#fff" : "rgba(255,255,255,0.5)", transition: "all 0.2s", fontFamily: "'DM Sans', sans-serif"}
-            }, `${idx+1}. ${t.label.split(" ")[0]} ${done === t.items.length ? "\u2713" : `${done}/${t.items.length}`}`);
-          })
-        )
-      )
-    ),
-
-    // Ref toggle
-    React.createElement("div", {style: {maxWidth: 720, margin: "16px auto 0", padding: "0 16px"}},
-      React.createElement("button", {onClick: () => setShowRef(!showRef), style: {background: "#fff", border: "1px solid #ddd", borderRadius: 10, padding: "10px 16px", fontSize: 13, cursor: "pointer", color: "#1F3864", fontWeight: 600, width: "100%", fontFamily: "'DM Sans', sans-serif"}},
-        `${showRef ? "\u25be" : "\u25b8"} R\u00e9f\u00e9rentiel de notation (F et I)`
-      ),
-      showRef && React.createElement("div", {style: {background: "#fff", border: "1px solid #e0e0e0", borderRadius: 10, padding: 20, marginTop: 8, fontSize: 13, lineHeight: 1.7, color: "#444"}},
-        React.createElement("div", {style: {marginBottom: 12}},
-          React.createElement("strong", {style: {color: "#1F3864"}}, "Fr\u00e9quence (F)"),
-          " \u2014 \u00c0 quelle fr\u00e9quence ce probl\u00e8me affecte-t-il votre travail ? Pour les constats permanents, \u00e9valuez \u00e0 quelle fr\u00e9quence vous en ressentez l\u2019impact.",
-          React.createElement("div", {style: {marginTop: 4, paddingLeft: 8, borderLeft: "3px solid #e0e0e0"}},
-            "1 = Tr\u00e8s rare (quelques fois/an) \u00b7 2 = Ponctuelle (quelques fois/mois) \u00b7 3 = R\u00e9guli\u00e8re (plusieurs fois/semaine) \u00b7 4 = Fr\u00e9quente (quotidien) \u00b7 5 = Syst\u00e9matique (\u00e0 chaque action)"
-          )
-        ),
-        React.createElement("div", null,
-          React.createElement("strong", {style: {color: "#1F3864"}}, "Impact (I)"),
-          " \u2014 Quel impact sur votre activit\u00e9 ?",
-          React.createElement("div", {style: {marginTop: 4, paddingLeft: 8, borderLeft: "3px solid #e0e0e0"}},
-            "1 = N\u00e9gligeable \u00b7 2 = Mineur \u00b7 3 = Mod\u00e9r\u00e9 (qualit\u00e9 donn\u00e9es/r\u00e9activit\u00e9) \u00b7 4 = Significatif (frein performance) \u00b7 5 = Critique (emp\u00eache le business)"
-          )
-        )
-      )
-    ),
-
-    // Content
-    React.createElement("div", {style: {maxWidth: 720, margin: "16px auto 100px", padding: "0 16px"}},
-      React.createElement("div", {style: {background: theme.color, color: "#fff", padding: "14px 20px", borderRadius: "12px 12px 0 0", fontWeight: 700, fontSize: 15}},
-        `Th\u00e9matique ${currentTheme+1}/${THEMES.length} \u2014 ${theme.label}`
-      ),
-      React.createElement("div", {style: {background: "#fff", borderRadius: "0 0 12px 12px", boxShadow: "0 4px 20px rgba(0,0,0,0.06)"}},
-        theme.items.map((item, idx) => {
-          const r = ratings[item.id] || {};
-          const isDone = r.f && r.i;
-          return React.createElement("div", {key: item.id, style: {padding: "20px 24px", borderBottom: idx < theme.items.length - 1 ? "1px solid #f0f0f0" : "none"}},
-            React.createElement("div", {style: {display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 10}},
-              React.createElement("span", {style: {background: isDone ? "#4CAF50" : "#e0e0e0", color: "#fff", borderRadius: 6, padding: "2px 8px", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", marginTop: 2, transition: "background 0.3s"}}, item.id),
-              React.createElement("div", null,
-                React.createElement("div", {style: {fontWeight: 700, fontSize: 14, color: "#1F3864", marginBottom: 4}}, item.text),
-                React.createElement("div", {style: {fontSize: 13, color: "#777", lineHeight: 1.5}}, item.desc)
-              )
-            ),
-            React.createElement("div", {style: {display: "flex", gap: 24, marginTop: 12, flexWrap: "wrap"}},
-              React.createElement("div", null,
-                React.createElement("div", {style: {fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6}}, "Fr\u00e9quence"),
-                React.createElement("div", {style: {display: "flex", gap: 6}},
-                  [1,2,3,4,5].map(v => React.createElement(ScoreButton, {key: v, value: v, selected: r.f === v, onClick: () => setRating(item.id, "f", v), color: "#2E5FA1"}))
-                )
-              ),
-              React.createElement("div", null,
-                React.createElement("div", {style: {fontSize: 11, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6}}, "Impact"),
-                React.createElement("div", {style: {display: "flex", gap: 6}},
-                  [1,2,3,4,5].map(v => React.createElement(ScoreButton, {key: v, value: v, selected: r.i === v, onClick: () => setRating(item.id, "i", v), color: "#C62828"}))
-                )
-              )
-            )
-          );
-        })
-      ),
-
-      // Navigation
-      React.createElement("div", {style: {display: "flex", justifyContent: "space-between", marginTop: 20, gap: 12}},
-        React.createElement("button", {
-          onClick: () => setCurrentTheme(Math.max(0, currentTheme - 1)),
-          disabled: currentTheme === 0,
-          style: {padding: "12px 24px", borderRadius: 10, border: "1px solid #ddd", background: "#fff", cursor: currentTheme === 0 ? "default" : "pointer", opacity: currentTheme === 0 ? 0.4 : 1, fontWeight: 600, fontSize: 14, color: "#1F3864", fontFamily: "'DM Sans', sans-serif"}
-        }, "\u2190 Pr\u00e9c\u00e9dent"),
-
-        currentTheme < THEMES.length - 1 ?
-          React.createElement("button", {
-            onClick: () => setCurrentTheme(currentTheme + 1),
-            style: {padding: "12px 24px", borderRadius: 10, border: "none", background: "#1F3864", color: "#fff", cursor: "pointer", fontWeight: 600, fontSize: 14, fontFamily: "'DM Sans', sans-serif"}
-          }, "Suivant \u2192") :
-          React.createElement("button", {
-            onClick: handleExport, disabled: answered < TOTAL,
-            style: {padding: "12px 28px", borderRadius: 10, border: "none",
-              background: answered >= TOTAL ? "linear-gradient(135deg, #1F3864, #2E5FA1)" : "#ccc",
-              color: "#fff", cursor: answered >= TOTAL ? "pointer" : "default",
-              fontWeight: 700, fontSize: 14, fontFamily: "'DM Sans', sans-serif",
-              boxShadow: answered >= TOTAL ? "0 4px 15px rgba(31,56,100,0.3)" : "none"}
-          }, `Exporter mes r\u00e9ponses (${answered}/${TOTAL})`)
-      )
-    )
-  );
-}
-
-ReactDOM.render(React.createElement(App), document.getElementById("root"));
+ReactDOM.render(React.createElement(App),document.getElementById("root"));
 </script>
 </body>
 </html>
