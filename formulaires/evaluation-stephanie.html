@@ -55,29 +55,45 @@ const[reform,setReform]=useState({});
 const[cur,setCur]=useState(0);
 const[done,setDone]=useState(false);
 const[showRef,setShowRef]=useState(false);
+const[jsonData,setJsonData]=useState(null);
 const topR=useRef(null);
 const ans=Object.keys(ratings).filter(k=>ratings[k]&&ratings[k].f&&ratings[k].i&&ratings[k].c).length;
 const pct=Math.round((ans/TOTAL)*100);
 const set=(id,t,v)=>setRatings(p=>({...p,[id]:{...p[id],[t]:v}}));
 const setR=(id,f,v)=>setReform(p=>({...p,[id]:{...p[id],[f]:v}}));
+const buildData=()=>({formulaire:"Entretien St\u00e9phanie - Direction commerciale",repondant:"St\u00e9phanie Dumoulin",date_soumission:new Date().toISOString(),nombre_reponses:ans,total_irritants:TOTAL,
+reponses:ALL.map(item=>({id:item.id,theme:item.theme,irritant_original:item.text,irritant_reformule:reform[item.id]?.text||null,contournement_reformule:reform[item.id]?.contournement||null,frequence:ratings[item.id]?.f||null,impact:ratings[item.id]?.i||null,score:(ratings[item.id]?.f&&ratings[item.id]?.i)?ratings[item.id].f*ratings[item.id].i:null,contournement:ratings[item.id]?.c||null}))});
 const send=()=>{
-const data={formulaire:"Entretien Stéphanie - Direction commerciale",repondant:"Stéphanie Dumoulin",date_soumission:new Date().toISOString(),nombre_reponses:ans,total_irritants:TOTAL,
-reponses:ALL.map(item=>({id:item.id,theme:item.theme,irritant_original:item.text,irritant_reformule:reform[item.id]?.text||null,contournement_reformule:reform[item.id]?.contournement||null,frequence:ratings[item.id]?.f||null,impact:ratings[item.id]?.i||null,score:(ratings[item.id]?.f&&ratings[item.id]?.i)?ratings[item.id].f*ratings[item.id].i:null,contournement:ratings[item.id]?.c||null}))};
+const data=buildData();
 const j=JSON.stringify(data,null,2);
-const s=encodeURIComponent("Evaluation CRM Haxoneo - Stéphanie Direction commerciale");
-const b=encodeURIComponent("Bonjour Maxime,\n\nVoici mon évaluation des irritants CRM :\n\n"+j+"\n\nCordialement,\nStéphanie");
+setJsonData(j);
+const s=encodeURIComponent("Evaluation CRM Haxoneo - St\u00e9phanie Direction commerciale");
+const b=encodeURIComponent("Bonjour Maxime,\n\nVoici mon \u00e9valuation des irritants CRM :\n\n"+j+"\n\nCordialement,\nSt\u00e9phanie");
 window.location.href=`mailto:maxime@mxr-consulting.com?subject=${s}&body=${b}`;
 setDone(true);
 };
+const downloadJson=()=>{
+const j=jsonData||JSON.stringify(buildData(),null,2);
+const blob=new Blob([j],{type:"application/json"});
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;a.download=`evaluation_stephanie_${new Date().toISOString().slice(0,10)}.json`;
+a.click();URL.revokeObjectURL(url);
+};
 useEffect(()=>{topR.current?.scrollIntoView({behavior:"smooth"})},[cur]);
-if(done)return React.createElement("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}},
-React.createElement("div",{style:{textAlign:"center",padding:48,background:"#fff",borderRadius:20,boxShadow:"0 8px 40px rgba(0,0,0,0.08)",maxWidth:520}},
+if(done)return React.createElement("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:16}},
+React.createElement("div",{style:{textAlign:"center",padding:40,background:"#fff",borderRadius:20,boxShadow:"0 8px 40px rgba(0,0,0,0.08)",maxWidth:540,width:"100%"}},
 React.createElement("div",{style:{fontSize:56,marginBottom:16,color:"#4CAF50"}},"\u2713"),
-React.createElement("h2",{style:{color:"#1F3864",fontSize:24,marginBottom:12}},"Merci Stéphanie !"),
-React.createElement("p",{style:{color:"#666",fontSize:15,lineHeight:1.6}},
-"Votre client mail s'est ouvert avec vos réponses pré-remplies.",React.createElement("br"),
-"Il ne vous reste plus qu'à cliquer ",React.createElement("strong",null,"Envoyer")," dans votre messagerie.",React.createElement("br"),React.createElement("br"),
-React.createElement("span",{style:{fontSize:13,color:"#999"}},"Si votre messagerie ne s'est pas ouverte, contactez maxime@mxr-consulting.com"))));
+React.createElement("h2",{style:{color:"#1F3864",fontSize:24,marginBottom:16}},"Merci St\u00e9phanie !"),
+React.createElement("p",{style:{color:"#666",fontSize:15,lineHeight:1.7,marginBottom:24}},
+"Votre client mail s\u2019est ouvert avec vos r\u00e9ponses pr\u00e9-remplies.",React.createElement("br"),
+"Il ne vous reste plus qu\u2019\u00e0 cliquer ",React.createElement("strong",null,"Envoyer")," dans votre messagerie."),
+React.createElement("div",{style:{background:"#FFF8E1",border:"1px solid #FFE082",borderRadius:12,padding:20,textAlign:"left",marginBottom:8}},
+React.createElement("div",{style:{fontWeight:700,fontSize:14,color:"#E65100",marginBottom:8}},"\u26a0\ufe0f Votre messagerie ne s\u2019est pas ouverte ?"),
+React.createElement("p",{style:{fontSize:13,color:"#666",lineHeight:1.6,marginBottom:12}},
+"Pas de panique, vos r\u00e9ponses sont en s\u00e9curit\u00e9. T\u00e9l\u00e9chargez le fichier ci-dessous et envoyez-le en pi\u00e8ce jointe \u00e0 :"),
+React.createElement("a",{href:"mailto:maxime@mxr-consulting.com",style:{color:"#1F3864",fontWeight:700,fontSize:14,textDecoration:"underline"}},"maxime@mxr-consulting.com"),
+React.createElement("button",{onClick:downloadJson,style:{display:"block",width:"100%",marginTop:16,padding:"12px 24px",borderRadius:10,border:"none",background:"linear-gradient(135deg,#1F3864,#2E5FA1)",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",boxShadow:"0 4px 15px rgba(31,56,100,0.3)"}},"\u2b07 T\u00e9l\u00e9charger mes r\u00e9ponses"))));
 const theme=THEMES[cur];
 return React.createElement("div",null,
 React.createElement("div",{ref:topR}),
