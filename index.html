@@ -73,6 +73,55 @@ h1 em{font-style:italic;color:var(--rust)}
 .format-desc{font-size:.83rem;color:#777;line-height:1.7}
 .format-price{margin-top:1.2rem;font-size:.78rem;color:var(--rust);font-weight:500;letter-spacing:.05em}
 
+/* OEIL EXTERIEUR */
+#oeil{background:var(--cream);position:relative;overflow:hidden}
+#oeil::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;border:1px solid var(--rust);border-radius:50%;opacity:.08;pointer-events:none}
+#oeil::after{content:'';position:absolute;top:-50px;right:-50px;width:300px;height:300px;border:1px solid var(--rust);border-radius:50%;opacity:.12;pointer-events:none}
+#oeil .container{position:relative;z-index:1}
+#oeil h2{font-family:'DM Serif Display',serif;font-size:2.6rem;font-weight:400;margin-bottom:.5rem;line-height:1.15}
+#oeil h2 em{color:var(--rust);font-style:italic}
+.oeil-baseline{font-size:1.05rem;color:#555;max-width:600px;line-height:1.8;margin-bottom:.6rem}
+.oeil-pitch{color:#666;font-size:.95rem;max-width:620px;line-height:1.9;margin-bottom:3rem;font-style:italic;border-left:2px solid var(--sage);padding-left:1.2rem}
+.oeil-manifesto{background:var(--charcoal);color:#fff;padding:2.5rem 2.5rem 2.2rem;margin-bottom:3.5rem;position:relative;overflow:hidden}
+.oeil-manifesto::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--rust)}
+.oeil-manifesto-title{font-family:'DM Serif Display',serif;font-size:1.45rem;line-height:1.3;color:#fff;margin-bottom:1.4rem;font-weight:400}
+.oeil-manifesto-title em{color:var(--rust);font-style:italic}
+.oeil-manifesto p{color:rgba(255,255,255,.78);font-size:.92rem;line-height:1.85;margin-bottom:.9rem;max-width:720px}
+.oeil-manifesto p:last-child{margin-bottom:0}
+.oeil-manifesto p strong{color:#fff;font-weight:500}
+.oeil-step-split{margin-top:.7rem;display:flex;flex-direction:column;gap:.5rem}
+.oeil-step-side{font-size:.78rem;line-height:1.6;color:#777;padding:.5rem .7rem;background:var(--cream);border-left:2px solid var(--sage)}
+.oeil-step-side.ai{border-left-color:var(--rust)}
+.oeil-step-side strong{color:var(--charcoal);font-weight:500;letter-spacing:.02em}
+.oeil-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:3rem}
+.oeil-step{background:#fff;border:1px solid var(--border);padding:1.5rem 1.3rem;position:relative;transition:border-color .25s,transform .25s}
+.oeil-step:hover{border-color:var(--rust);transform:translateY(-2px)}
+.oeil-step-num{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--rust);margin-bottom:.4rem}
+.oeil-step-when{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--sage);margin-bottom:.6rem}
+.oeil-step-title{font-weight:500;font-size:.95rem;color:var(--charcoal);margin-bottom:.5rem}
+.oeil-step-desc{font-size:.8rem;color:#777;line-height:1.6}
+.oeil-bottom{display:grid;grid-template-columns:1.4fr 1fr;gap:2.5rem;align-items:start;margin-bottom:2.5rem}
+.oeil-deliverable{background:var(--charcoal);color:#fff;padding:2rem;position:relative}
+.oeil-deliverable::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rust)}
+.oeil-deliverable-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--rust);margin-bottom:.8rem}
+.oeil-deliverable-title{font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:1rem;color:#fff}
+.oeil-deliverable-list{list-style:none;padding:0}
+.oeil-deliverable-list li{font-size:.85rem;color:rgba(255,255,255,.75);line-height:1.7;margin-bottom:.6rem;padding-left:1.2rem;position:relative}
+.oeil-deliverable-list li::before{content:'→';position:absolute;left:0;color:var(--rust)}
+.oeil-price-block{background:#fff;border:1px solid var(--border);padding:2rem}
+.oeil-price-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:#999;margin-bottom:.4rem}
+.oeil-price{font-family:'DM Serif Display',serif;font-size:2.4rem;color:var(--charcoal);line-height:1}
+.oeil-price-unit{font-size:.9rem;color:#888;margin-left:.3rem;font-family:'DM Sans',sans-serif}
+.oeil-price-detail{font-size:.85rem;color:#666;line-height:1.7;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.oeil-price-detail strong{color:var(--rust);font-weight:500}
+.oeil-commits{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;margin-bottom:2.5rem}
+.oeil-commit{display:flex;gap:.8rem;align-items:flex-start;font-size:.85rem;color:#555;line-height:1.6}
+.oeil-commit-mark{color:var(--rust);font-size:1rem;flex-shrink:0;margin-top:.05rem}
+.oeil-cta-wrap{text-align:center;padding-top:1.5rem;border-top:1px solid var(--border)}
+.oeil-cta-line{font-size:.95rem;color:#666;margin-bottom:1.2rem}
+.oeil-cta{display:inline-block;background:var(--rust);color:#fff;padding:1rem 2.4rem;font-size:.95rem;letter-spacing:.05em;text-decoration:none;transition:background .2s,transform .15s;cursor:none}
+.oeil-cta:hover{background:var(--charcoal);transform:translateY(-1px)}
+
 /* REFERENCES */
 #references{background:var(--cream)}
 #references h2{font-family:'DM Serif Display',serif;font-size:2.4rem;font-weight:400;margin-bottom:.5rem}
@@ -175,6 +224,10 @@ footer span{color:var(--rust)}
   .hero-inner,.about-grid,.contact-grid{grid-template-columns:1fr;gap:2rem}
   .formats-grid,.refs-grid,.tarifs-grid,.agents-grid{grid-template-columns:1fr}
   .testi-grid{grid-template-columns:1fr}
+  .oeil-steps{grid-template-columns:1fr}
+  .oeil-bottom{grid-template-columns:1fr}
+  .oeil-commits{grid-template-columns:1fr}
+  #oeil h2{font-size:2rem}
   h1{font-size:2.4rem}
 }
 </style>
@@ -191,6 +244,7 @@ footer span{color:var(--rust)}
   <ul id="nav-menu">
     <li><a href="#about">Approche</a></li>
     <li><a href="#formats">Formats</a></li>
+    <li><a href="#oeil">L'Œil Extérieur</a></li>
     <li><a href="#references">Références</a></li>
     <li><a href="#ressources">Ressources</a></li>
     <li><a href="#agents">Mes agents IA</a></li>
@@ -202,7 +256,7 @@ footer span{color:var(--rust)}
 <section id="hero">
   <div class="hero-inner">
     <div>
-      <span class="hero-tag">Diagnostic IA · Conférences · Conseil</span>
+      <span class="hero-tag">Diagnostic · Conférences · Conseil</span>
       <h1>L'IA <em>concrète.</em><br>Sans vendre<br>du rêve.</h1>
       <p class="hero-sub">J'aide les organisations à comprendre, adopter et utiliser l'IA de façon simple, responsable et actionnable.</p>
       <div class="cta-group">
@@ -293,6 +347,88 @@ footer span{color:var(--rust)}
         <div class="format-desc">Accompagnement pour embarquer les équipes, identifier les opportunités IA et définir une feuille de route claire et actionnable.</div>
         <div class="format-price">Format sur-mesure · À partir de 2j</div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- OEIL EXTERIEUR -->
+<section id="oeil">
+  <div class="container">
+    <span class="hero-tag" style="margin-bottom:1.2rem">Nouvelle offre · Diagnostic flash with AI</span>
+    <h2>L'Œil <em>Extérieur</em></h2>
+    <p class="oeil-baseline">Un regard stratégique extérieur sur vos sujets qui dorment. Une expérience concrète de l'IA bien utilisée. Le tout en une demi-journée.</p>
+    <p class="oeil-pitch">Quand on dirige une TPE ou une PME, on sait souvent que <em>quelque chose</em> coince ou pourrait bouger. Un process qui frotte, un outil mal utilisé, un sujet repoussé depuis trop longtemps. Mais entre l'opérationnel et le quotidien, il manque le temps et le recul pour le formaliser. C'est là que j'interviens.</p>
+
+    <div class="oeil-manifesto">
+      <div class="oeil-manifesto-title">Le principe : l'IA là où elle est <em>utile</em>. L'humain là où il est <em>irremplaçable</em>.</div>
+      <p>L'IA transcrit, structure, analyse, croise les signaux, accélère. Elle fait en quelques heures ce qu'un consultant met une semaine à produire à la main.</p>
+      <p>Mais c'est <strong>l'humain</strong> qui crée le climat de confiance d'un entretien. Qui perçoit ce qui n'est pas dit. Qui mobilise vos équipes. Qui assume une recommandation. Qui regarde le dirigeant dans les yeux.</p>
+      <p>L'Œil Extérieur, c'est une expérience où vous voyez cette répartition à l'œuvre — sur un sujet qui compte vraiment pour votre boîte. Pas sur un cas d'école.</p>
+    </div>
+
+    <div class="oeil-steps">
+      <div class="oeil-step">
+        <div class="oeil-step-num">01</div>
+        <div class="oeil-step-when">Avant · 30 min</div>
+        <div class="oeil-step-title">Cadrage en visio</div>
+        <div class="oeil-step-desc">On comprend votre contexte, on identifie ensemble les 2 ou 3 personnes clés à interviewer, on cale les objectifs et la date de la demi-journée sur site.</div>
+      </div>
+      <div class="oeil-step">
+        <div class="oeil-step-num">02</div>
+        <div class="oeil-step-when">Jour J · Demi-journée sur site</div>
+        <div class="oeil-step-title">Trois entretiens</div>
+        <div class="oeil-step-desc">Dirigeant + 1 ou 2 personnes clés (commercial, marketing, opérations…). 45 à 60 min chacun.</div>
+        <div class="oeil-step-split">
+          <div class="oeil-step-side"><strong>Côté humain :</strong> écoute active, climat de confiance, lecture des signaux faibles.</div>
+          <div class="oeil-step-side ai"><strong>Côté IA :</strong> enregistrement, transcription, structuration thématique des échanges.</div>
+        </div>
+      </div>
+      <div class="oeil-step">
+        <div class="oeil-step-num">03</div>
+        <div class="oeil-step-when">Après · 5 à 7 jours</div>
+        <div class="oeil-step-title">Production du livrable</div>
+        <div class="oeil-step-desc">Synthèse, cartographie des sujets, recommandations et priorisation. Une méthode structurée — pour livrer vite sans rien céder sur la qualité.</div>
+        <div class="oeil-step-split">
+          <div class="oeil-step-side ai"><strong>Côté IA :</strong> analyse croisée des entretiens, détection des récurrences et des angles morts, premier maillage des sujets.</div>
+          <div class="oeil-step-side"><strong>Côté humain :</strong> arbitrages, recommandations, mise en perspective stratégique.</div>
+        </div>
+      </div>
+      <div class="oeil-step">
+        <div class="oeil-step-num">04</div>
+        <div class="oeil-step-when">Restitution · 1h en visio ou présentiel</div>
+        <div class="oeil-step-title">Lecture & méthode partagée</div>
+        <div class="oeil-step-desc">Présentation du livrable. Puis je vous montre, étape par étape, comment je m'y suis pris avec l'IA : les outils, les prompts, les agents construits sur mesure. Vous repartez avec un cas d'usage IA tangible — le vôtre.</div>
+      </div>
+    </div>
+
+    <div class="oeil-bottom">
+      <div class="oeil-deliverable">
+        <div class="oeil-deliverable-label">Le livrable</div>
+        <div class="oeil-deliverable-title">Un document de 8 à 12 pages, exploitable seul.</div>
+        <ul class="oeil-deliverable-list">
+          <li>Synthèse des entretiens, anonymisée si besoin</li>
+          <li>Cartographie des sujets stratégiques détectés</li>
+          <li>Priorisation par impact et par effort de mise en œuvre</li>
+          <li>Pour les 2-3 sujets prioritaires : proposition de diagnostic complet chiffrée</li>
+        </ul>
+      </div>
+      <div class="oeil-price-block">
+        <div class="oeil-price-label">Tarif tout compris</div>
+        <div class="oeil-price">900€<span class="oeil-price-unit">HT</span></div>
+        <div class="oeil-price-detail">Cadrage, demi-journée sur site, livrable, restitution. <strong>Si un diagnostic complet est commandé dans les 60 jours, ce montant est intégralement déduit du devis.</strong></div>
+      </div>
+    </div>
+
+    <div class="oeil-commits">
+      <div class="oeil-commit"><span class="oeil-commit-mark">→</span><span><strong>Mobilisation légère.</strong> 3 entretiens, pas d'atelier collectif lourd à organiser.</span></div>
+      <div class="oeil-commit"><span class="oeil-commit-mark">→</span><span><strong>Livrable utile, même sans suite.</strong> Vous repartez avec une matière exploitable et des pistes concrètes d'outils ou d'agents IA fonctionnels, conçus pour votre activité.</span></div>
+      <div class="oeil-commit"><span class="oeil-commit-mark">→</span><span><strong>Une pierre, deux coups.</strong> Vos sujets stratégiques avancent. Et vous repartez avec des réflexes IA concrets, vus à l'œuvre sur votre propre boîte.</span></div>
+      <div class="oeil-commit"><span class="oeil-commit-mark">→</span><span><strong>Confidentialité totale.</strong> NDA signé en amont, systématiquement.</span></div>
+    </div>
+
+    <div class="oeil-cta-wrap">
+      <p class="oeil-cta-line">Vous sentez qu'il y a un sujet à creuser ? Échangeons 30 minutes pour voir si ça matche.</p>
+      <a href="https://calendar.app.google/PqFVvCrvMm2rQVxh7" target="_blank" class="oeil-cta">Réserver un échange →</a>
     </div>
   </div>
 </section>
@@ -494,6 +630,7 @@ footer span{color:var(--rust)}
         <input type="text" placeholder="Votre organisation (optionnel)">
         <select>
           <option value="" disabled selected>Votre projet</option>
+          <option>L'Œil Extérieur (diagnostic flash)</option>
           <option>Diagnostic IA</option>
           <option>Conférence / Plénière</option>
           <option>Fresque de l'IA</option>
@@ -525,7 +662,7 @@ function animRing(){
   requestAnimationFrame(animRing);
 }
 animRing();
-document.querySelectorAll('a,button,input,textarea,select,.format-card,.testi-card').forEach(el=>{
+document.querySelectorAll('a,button,input,textarea,select,.format-card,.testi-card,.oeil-step').forEach(el=>{
   el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
   el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
 });
